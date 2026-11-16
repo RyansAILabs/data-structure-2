@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filas — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Filas (FIFO): enqueue, dequeue, fila circular com front/rear/count, implementação com vetor e lista encadeada.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="filas" data-root="../" data-topic="filas">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Filas</div>
+        <span class="eyebrow">Bloco 5 · muito provável</span>
+        <h1>Filas (FIFO)</h1>
+        <p class="lead">
+          Fila é a estrutura do “primeiro que entra, primeiro que sai”. Entra no <strong>fim</strong>
+          (<code>enqueue</code>), sai pela <strong>frente</strong> (<code>dequeue</code>). O ponto que mais
+          derruba gente na prova é a <strong>fila circular</strong>: entender <code>front</code>,
+          <code>rear</code> e <code>count</code> sem confundir cheia com vazia.
+        </p>
+        <div class="meta-row">
+          <span class="pill green">~30 min de estudo</span>
+          <span class="pill">FIFO</span>
+          <span class="pill">fila circular</span>
+          <span class="pill">código Java testado</span>
+        </div>
+
+        <div class="toc" data-toc></div>
+
+        <h2 id="modelo"><span class="num">01</span> O modelo FIFO</h2>
+        <p>
+          <strong>FIFO</strong> = First In, First Out. A fila tem duas pontas: a <strong>frente</strong>
+          (onde se remove) e o <strong>fim</strong> (onde se insere). O elemento do meio não é acessível
+          sem remover os da frente. É uma fila de banco: quem chegou primeiro é atendido primeiro.
+        </p>
+        <pre class="ascii">enqueue(10)  enqueue(20)  enqueue(30)
+     │            │            │
+     ▼            ▼            ▼
+┌─────┬─────┬─────┐
+│ 10  │ 20  │ 30  │
+└─────┴─────┴─────┘
+  ▲                 ▲
+frente             fim
+
+dequeue() → 10        (a frente anda para o 20)
+dequeue() → 20        (a frente anda para o 30)
+dequeue() → 30        (fila vazia)</pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Operação</th><th>Efeito</th><th class="c">Custo</th></tr></thead>
+            <tbody>
+              <tr><td><code>enqueue(v)</code></td><td>insere no fim</td><td class="c">O(1)</td></tr>
+              <tr><td><code>dequeue()</code></td><td>remove e retorna a frente; erro se vazia</td><td class="c">O(1)</td></tr>
+              <tr><td><code>peek()</code></td><td>consulta a frente sem remover</td><td class="c">O(1)</td></tr>
+              <tr><td><code>isEmpty()</code> / <code>isFull()</code></td><td>estado da fila</td><td class="c">O(1)</td></tr>
+              <tr><td><code>size()</code></td><td>quantidade de elementos</td><td class="c">O(1)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="demo"><span class="num">02</span> Teste você mesmo</h2>
+        <p>
+          Enfileire e desenfileire para ver a frente mudar. Repare que o primeiro que entrou é sempre o
+          primeiro a sair — diferente da pilha.
+        </p>
+        <div class="demo" id="queueDemo">
+          <div class="demo-top">
+            <div class="demo-title">Fila interativa<small>capacidade 8 · frente à esquerda</small></div>
+            <label class="field">Valor <input type="text" id="queueValue" placeholder="ex.: 42" style="width:90px"></label>
+            <span class="pill" id="queueMeta">tamanho 0/8</span>
+          </div>
+          <div class="queue-viz" id="queueViz"></div>
+          <div class="node-msg" id="queueMsg"></div>
+          <div class="controls">
+            <button class="btn" id="queueEnqueue">enqueue(valor)</button>
+            <button class="btn soft" id="queueDequeue">dequeue()</button>
+            <button class="btn ghost" id="queuePeek">peek()</button>
+            <button class="btn ghost" id="queueClear">Esvaziar</button>
+          </div>
+        </div>
+
+        <h2 id="ligada"><span class="num">03</span> Fila sobre lista encadeada</h2>
+        <p>
+          É a implementação do professor: a fila é uma especialização da lista dupla com descritor.
+          <code>enqueue</code> insere no fim e <code>dequeue</code> remove do início — as duas operações
+          ficam O(1) porque o descritor guarda <code>inicio</code>, <code>fim</code> e <code>size</code>.
+        </p>
+        <p class="small muted">Os arquivos linkados nesta página são cópias fiéis do repositório do professor;
+        os blocos de código mostram os mesmos métodos com comentários do guia.</p>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">Queue.java — completa</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public class Queue&lt;T&gt; extends LinkedLinearList&lt;T&gt; {
+
+    public Queue(int capacity) {
+        super(capacity);
+    }
+
+    public boolean enqueue(T value) {
+        return add(value);            // insere no fim
+    }
+
+    public T dequeue() throws OperationFailed {
+        return pop();                 // remove do início
+    }
+
+    public T peek() throws OperationFailed {
+        if (isEmpty()) {
+            throw new OperationFailed();
+        }
+        return get(0);                // frente da fila
+    }
+}</code></pre>
+        </div>
+        <div class="callout info">
+          <span class="ico">ℹ️</span>
+          <div>
+            <strong>Por que O(1) nas duas pontas?</strong>
+            <p class="mb0">Com a lista <strong>dupla + descritor</strong>, inserir no fim usa
+            <code>fim</code> e remover do início usa <code>inicio</code>, ambos diretos. Se fosse uma lista
+            simples sem descritor, inserir no fim seria O(n), pois precisaria percorrer até o último nó.</p>
+          </div>
+        </div>
+
+        <h2 id="circular"><span class="num">04</span> Fila circular com vetor</h2>
+        <p class="small muted">A fila circular (<code>CircularQueue.java</code>) é um complemento do guia:
+        o repositório do professor traz a fila sobre lista encadeada; a variante circular é a que mais cai
+        em prova quando o enunciado pede vetor + <code>front</code>/<code>rear</code>.</p>
+        <p>
+          Se usarmos um vetor comum e apenas incrementarmos a frente, as posições do começo ficam vazias e
+          nunca são reutilizadas. A fila “anda para a direita” até estourar o vetor, mesmo com posições
+          livres atrás. A solução é <strong>circular</strong>: ao passar do último índice, voltamos ao 0 com
+          o operador <strong>módulo</strong>.
+        </p>
+        <pre class="ascii">capacidade = 5
+índice:     0     1     2     3     4
+          ┌─────┬─────┬─────┬─────┬─────┐
+slots:    │  F  │     │  C  │  D  │  E  │
+          └─────┴─────┴─────┴─────┴─────┘
+             ▲                 ▲
+           rear=1           front=2
+     (próxima livre)     (primeiro elemento)
+
+Ordem lógica: C → D → E → F   (dá a volta!)
+count = 4 · frente = 2 · rear = 1</pre>
+
+        <ul>
+          <li><strong>front</strong> = índice do primeiro elemento (o próximo a sair).</li>
+          <li><strong>rear</strong> = índice da próxima posição livre (onde o próximo entra).</li>
+          <li><strong>count</strong> = quantos elementos existem. Resolve a ambiguidade: com count, cheia é <code>count == capacidade</code> e vazia é <code>count == 0</code>.</li>
+          <li>Avanço: <code>front = (front + 1) % capacidade</code> e <code>rear = (rear + 1) % capacidade</code>.</li>
+        </ul>
+
+        <div class="callout exam">
+          <span class="ico">📝</span>
+          <div>
+            <strong>Sem count, a condição de cheia muda</strong>
+            <p class="mb0">Se a implementação não tiver count, é comum reservar uma posição vazia e usar
+            <code>(rear + 1) % capacidade == front</code> para “cheia”. Nesse caso a fila só guarda
+            <code>capacidade − 1</code> elementos. <strong>Leia o enunciado</strong>: se ele menciona
+            <code>count</code>, use <code>count == capacidade</code>. Se não menciona, provavelmente quer a
+            condição com o espaço reservado.</p>
+          </div>
+        </div>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">CircularQueue.java — enqueue e dequeue</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public boolean enqueue(T value) {
+    if (isFull()) {                     // count == capacidade
+        return false;
+    }
+    data[rear] = value;
+    rear = (rear + 1) % data.length;    // dá a volta
+    count++;
+    return true;
+}
+
+public T dequeue() throws OperationFailed {
+    if (isEmpty()) {                    // count == 0
+        throw new OperationFailed();
+    }
+    T value = (T) data[front];
+    data[front] = null;
+    front = (front + 1) % data.length;
+    count--;
+    return value;
+}</code></pre>
+        </div>
+
+        <h3>Simule no navegador</h3>
+        <p>
+          Observe os índices, as letras <span class="pill accent">F</span> (front) e
+          <span class="pill green">R</span> (rear, próxima posição livre). Enfileire até dar a volta e veja
+          os índices voltarem ao 0.
+        </p>
+        <div class="demo" id="circularDemo">
+          <div class="demo-top">
+            <div class="demo-title">Fila circular<small>capacidade 6 · F = front, R = rear (próxima livre)</small></div>
+            <label class="field">Valor <input type="text" id="circularValue" placeholder="ex.: 42" style="width:90px"></label>
+            <span class="pill" id="circularMeta">count 0/6</span>
+          </div>
+          <div class="circular" id="circularSlots"></div>
+          <div class="node-msg" id="circularMsg"></div>
+          <div class="controls">
+            <button class="btn" id="circularEnqueue">enqueue(valor)</button>
+            <button class="btn soft" id="circularDequeue">dequeue()</button>
+            <button class="btn ghost" id="circularReset">Reiniciar</button>
+          </div>
+        </div>
+
+        <h3>Traço em uma fila de capacidade 5</h3>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>Operação</th><th>front</th><th>rear</th><th>count</th><th>Ordem lógica (frente → fim)</th></tr></thead>
+            <tbody>
+              <tr><td>início</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+              <tr><td>enqueue(A)</td><td>0</td><td>1</td><td>1</td><td>A</td></tr>
+              <tr><td>enqueue(B)</td><td>0</td><td>2</td><td>2</td><td>A, B</td></tr>
+              <tr><td>enqueue(C)</td><td>0</td><td>3</td><td>3</td><td>A, B, C</td></tr>
+              <tr><td>dequeue() → A</td><td>1</td><td>3</td><td>2</td><td>B, C</td></tr>
+              <tr><td>dequeue() → B</td><td>2</td><td>3</td><td>1</td><td>C</td></tr>
+              <tr><td>enqueue(D)</td><td>2</td><td>4</td><td>2</td><td>C, D</td></tr>
+              <tr><td>enqueue(E)</td><td>2</td><td>0</td><td>3</td><td>C, D, E</td></tr>
+              <tr><td>enqueue(F)</td><td>2</td><td>1</td><td>4</td><td>C, D, E, F</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Na última linha, rear deu a volta: (4 + 1) % 5 = 0. Depois, (0 + 1) % 5 = 1. A fila está cheia? Não: count = 4 &lt; 5, ainda cabe um elemento na posição 1.</p>
+
+        <h2 id="aplicacoes"><span class="num">05</span> Onde se usa fila</h2>
+        <div class="grid grid-3">
+          <div class="card"><h4 class="mt0">🖨️ Fila de impressão</h4><p class="mb0">Documentos são impressos na ordem de chegada.</p></div>
+          <div class="card"><h4 class="mt0">⚙️ Escalonamento</h4><p class="mb0">Processos prontos esperam a CPU em uma fila (round-robin).</p></div>
+          <div class="card"><h4 class="mt0">🧭 BFS</h4><p class="mb0">Busca em largura usa fila para visitar níveis na ordem correta.</p></div>
+          <div class="card"><h4 class="mt0">📞 Atendimento</h4><p class="mb0">Senhas, call center e buffers de rede preservam a ordem.</p></div>
+          <div class="card"><h4 class="mt0">🎮 Eventos</h4><p class="mb0">Filas de eventos/mensagens processam na ordem de chegada.</p></div>
+          <div class="card"><h4 class="mt0">📥 I/O</h4><p class="mb0">Requisições de disco e rede são enfileiradas.</p></div>
+        </div>
+
+        <h3>Pilha × fila: a tabela que resolve muita questão</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Critério</th><th>Pilha</th><th>Fila</th></tr></thead>
+            <tbody>
+              <tr><td>Política</td><td>LIFO — último entra, primeiro sai</td><td>FIFO — primeiro entra, primeiro sai</td></tr>
+              <tr><td>Insere</td><td>topo (<code>push</code>)</td><td>fim (<code>enqueue</code>)</td></tr>
+              <tr><td>Remove</td><td>topo (<code>pop</code>)</td><td>frente (<code>dequeue</code>)</td></tr>
+              <tr><td>Consulta</td><td><code>peek</code> no topo</td><td><code>peek</code> na frente</td></tr>
+              <tr><td>Aplicação clássica</td><td>parênteses, pós-fixa, undo</td><td>impressão, BFS, escalonamento</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="exercicios"><span class="num">06</span> Exercícios de fixação</h2>
+
+        <details class="examq">
+          <summary>1. <code>enqueue(A)</code>, <code>enqueue(B)</code>, <code>dequeue()</code>, <code>enqueue(C)</code>. Qual é a ordem final da frente para o fim?</summary>
+          <div class="details-body">
+            <p class="mb0">Depois do dequeue sai A; restam B. O enqueue(C) põe no fim: <strong>B, C</strong>.
+            A frente é B.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>2. Fila circular de capacidade 5 com front = 3, rear = 1. Quantos elementos há?</summary>
+          <div class="details-body">
+            <p class="mb0"><code>count = (rear − front + capacidade) % capacidade = (1 − 3 + 5) % 5 = 3</code>.
+            Os elementos estão nas posições 3, 4 e 0. Se a implementação usar count, é só ler o campo; a
+            fórmula serve para conferir.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>3. Em uma fila circular de capacidade 5, rear = 4. Para onde rear vai após um enqueue?</summary>
+          <div class="details-body">
+            <p class="mb0"><code>rear = (4 + 1) % 5 = 0</code>. Ele volta ao início do vetor. O mesmo raciocínio
+            vale para front após um dequeue.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>4. Por que a fila circular é melhor que “deslocar todo mundo para a esquerda” a cada dequeue?</summary>
+          <div class="details-body">
+            <p class="mb0">Deslocar custa O(n) por remoção, pois todos os elementos andam uma casa. A circular
+            apenas incrementa <code>front</code> com módulo, O(1), e reutiliza as posições liberadas. Também
+            evita o desperdício de espaço do início do vetor.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>5. Uma fila circular com count tem capacidade 6 e count = 6. Ela está cheia ou vazia? E se count = 0?</summary>
+          <div class="details-body">
+            <p class="mb0">Com count = 6 = capacidade, está <strong>cheia</strong>. Com count = 0, está
+            <strong>vazia</strong>. Sem count, <code>front == rear</code> seria ambíguo — por isso o campo
+            count é tão útil.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>6. Qual estrutura usar para BFS (busca em largura) e por quê?</summary>
+          <div class="details-body">
+            <p class="mb0"><strong>Fila.</strong> A BFS visita os vértices por níveis: os vizinhos descobertos
+            entram no fim e são processados na ordem em que foram encontrados. Se usasse pilha, viraria DFS.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>7. Implemente <code>isEmpty</code> e <code>isFull</code> da fila circular com count.</summary>
+          <div class="details-body">
+            <pre class="ascii mb0">public boolean isEmpty() { return count == 0; }
+public boolean isFull()  { return count == data.length; }</pre>
+          </div>
+        </details>
+
+        <div class="callout tip">
+          <span class="ico">✅</span>
+          <div>
+            <strong>Checklist antes de seguir</strong>
+            <p class="mb0">Você consegue: (1) explicar FIFO em uma frase; (2) atualizar front/rear com módulo;
+            (3) dizer quando está cheia/vazia com e sem count; (4) justificar por que enqueue/dequeue são
+            O(1) na lista com descritor; (5) citar três aplicações.</p>
+          </div>
+        </div>
+
+        <div class="done-box">
+          <label><input type="checkbox" data-progress="filas"> Concluí esta página</label>
+          <span class="done-hint">O progresso fica salvo neste navegador.</span>
+        </div>
+
+        <div class="page-nav">
+          <a href="pilhas.html"><span class="pn-lbl">← Anterior</span><span class="pn-title">Pilhas</span></a>
+          <a class="next" href="resumo.html"><span class="pn-lbl">Próximo →</span><span class="pn-title">Resumo de véspera</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Código completo em <a href="../codigo/CircularQueue.java">codigo/CircularQueue.java</a></span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/estruturas.js"></script>
+</body>
+</html>

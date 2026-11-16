@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Listas encadeadas — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Listas simplesmente e duplamente encadeadas, nós, ponteiros, descritor, inserção, remoção e complexidade.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="encadeada" data-root="../" data-topic="encadeada">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Listas encadeadas</div>
+        <span class="eyebrow">Bloco 3 · presença quase certa</span>
+        <h1>Listas lineares encadeadas</h1>
+        <p class="lead">
+          Em vez de um vetor contíguo, cada elemento mora em um <strong>nó</strong> com o valor e uma
+          referência para o próximo (e, na lista dupla, para o anterior). Você troca o acesso direto por
+          flexibilidade: inserir e remover nas extremidades vira O(1). Na prova, quase tudo se resume a
+          <strong>desenhar as setas na ordem certa</strong>.
+        </p>
+        <div class="meta-row">
+          <span class="pill violet">~40 min de estudo</span>
+          <span class="pill">nó + next/prev</span>
+          <span class="pill">descritor</span>
+          <span class="pill">código Java testado</span>
+        </div>
+
+        <div class="toc" data-toc></div>
+
+        <h2 id="no"><span class="num">01</span> O nó e a ideia de encadear</h2>
+        <p>
+          Um nó guarda um valor e uma referência. A lista inteira é conhecida pela referência ao primeiro nó
+          (o <strong>início</strong>, ou head). O último nó aponta para <code>null</code>, indicando o fim.
+          Os nós <strong>não ficam lado a lado</strong> na memória: é o ponteiro que cria a sequência lógica.
+        </p>
+        <pre class="ascii">início
+  │
+  ▼
+┌──────┬──────┐     ┌──────┬──────┐     ┌──────┬──────┐
+│ 10   │ next ├────▶│ 20   │ next ├────▶│ 30   │ null │
+└──────┴──────┘     └──────┴──────┘     └──────┴──────┘
+                                          ▲
+                                   fim ───┘  (se houver descritor)</pre>
+        <p>
+          Se você perder a referência do início, perde a lista inteira. Se sobrescrever um
+          <code>next</code> antes de guardar o restante, os nós seguintes ficam inacessíveis (o famoso
+          “perdi a lista”). Por isso a <strong>ordem dos comandos</strong> é o coração do assunto.
+        </p>
+
+        <h2 id="simples"><span class="num">02</span> Lista simplesmente encadeada</h2>
+        <p>
+          Cada nó tem apenas <code>valor</code> e <code>next</code>. Só é possível caminhar do início para o
+          fim. As operações no início são O(1); para chegar ao fim ou a uma posição, é preciso percorrer.
+        </p>
+
+        <h3>Inserir no início</h3>
+        <pre class="ascii">novo.next = início;     // 1) novo aponta para o antigo primeiro
+início = novo;          // 2) o início passa a ser o novo
+
+antes:  início → [10] → [20] → null
+depois: início → [5] → [10] → [20] → null</pre>
+
+        <h3>Inserir depois de um nó <code>p</code></h3>
+        <pre class="ascii">novo.next = p.next;     // 1) salva o restante da lista
+p.next = novo;          // 2) só então liga p ao novo
+
+antes:   [10] → [20] → [30]        (p = nó 10)
+depois:  [10] → [15] → [20] → [30]</pre>
+        <div class="callout danger">
+          <span class="ico">🚨</span>
+          <div>
+            <strong>A ordem inversa perde a lista</strong>
+            <p class="mb0">Se fizer <code>p.next = novo</code> primeiro, a referência para o 20 é
+            sobrescrita e o restante (<code>[20] → [30]</code>) fica inacessível. Na prova, escreva sempre
+            <code>novo.next = p.next</code> antes de <code>p.next = novo</code>.</p>
+          </div>
+        </div>
+
+        <h3>Remover o primeiro</h3>
+        <pre class="ascii">início = início.next;              // pula o primeiro nó
+if (início == null) fim = null;    // a lista ficou vazia
+size--;
+
+antes:  início → [10] → [20] → null
+depois: início → [20] → null</pre>
+
+        <h3>Remover um nó do meio</h3>
+        <p>
+          Na lista simples, você precisa do <strong>anterior</strong>: <code>anterior.next = alvo.next</code>.
+          Sem a referência ao anterior, é necessário percorrer a lista para descobri-lo — O(n).
+        </p>
+        <pre class="ascii">antes:   [10] → [20] → [30] → [40]
+remover:               ▲ alvo
+operação: anterior(20).next = alvo.next(40)
+depois:  [10] → [20] → [40]</pre>
+
+        <h2 id="dupla"><span class="num">03</span> Lista duplamente encadeada e descritor</h2>
+        <p>
+          Cada nó ganha um <code>prev</code>. Isso permite andar nos dois sentidos e remover um nó
+          <strong>conhecido</strong> em O(1), pois o anterior está acessível sem percorrer. O custo é um
+          ponteiro extra por nó.
+        </p>
+        <pre class="ascii">        ┌──────┬──────┬──────┐        ┌──────┬──────┬──────┐
+null ◀──┤ prev │ 10   │ next ├───────▶┤ prev │ 20   │ next ├──▶ null
+        └──────┴──────┴──────┘        └──────┴──────┴──────┘</pre>
+        <p>
+          O <strong>descritor</strong> é um objeto que guarda <code>size</code>, <code>inicio</code> e
+          <code>fim</code>. Sem ele, descobrir o tamanho ou inserir no fim exigiria percorrer a lista. Com
+          ele, essas operações ficam O(1) — e é exatamente o que o código do professor faz.
+        </p>
+        <pre class="ascii">        ┌──────────────────────────────┐
+        │ Descritor                    │
+        │ size = 3                     │
+        │ inicio ─────────┐            │
+        │ fim ──────────┐ │            │
+        └───────────────┼─┼────────────┘
+                        │ │
+        ┌───────────────▼─▼──────────┐
+        │ [10] ⇄ [20] ⇄ [30]         │
+        └────────────────────────────┘</pre>
+
+        <h3>Inserir no meio (entre <code>anterior</code> e <code>próximo</code>)</h3>
+        <pre class="ascii">novo.prev = anterior;       // 1) o novo conhece os dois vizinhos
+novo.next = proximo;
+anterior.next = novo;       // 2) os vizinhos passam a apontar para o novo
+proximo.prev = novo;</pre>
+        <p>
+          Nas extremidades, os vizinhos que não existem viram <code>null</code> e o descritor é atualizado:
+          inserir no início muda <code>inicio</code> (e <code>fim</code>, se a lista estava vazia); inserir
+          no fim muda <code>fim</code>. Sempre incremente <code>size</code>.
+        </p>
+
+        <h3>Remover um nó <code>x</code></h3>
+        <pre class="ascii">x.prev.next = x.next;    // 2) o anterior pula para o próximo
+x.next.prev = x.prev;    // 3) o próximo volta para o anterior
+
+Se x era o primeiro: inicio = x.next;   (x.prev == null)
+Se x era o último:   fim = x.prev;      (x.next == null)
+size--;
+x.prev = x.next = null;  // opcional: isola o nó removido</pre>
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>Sempre trate os casos de borda</strong>
+            <p class="mb0">Antes de acessar <code>x.prev.next</code> ou <code>x.next.prev</code>, verifique
+            se <code>prev</code>/<code>next</code> não são <code>null</code>. Lista vazia, um único elemento,
+            remover o primeiro e remover o último são os casos que mais aparecem em prova — e os que mais
+            quebram código.</p>
+          </div>
+        </div>
+
+        <h2 id="demo"><span class="num">04</span> Monte a lista passo a passo</h2>
+        <p>
+          Use o valor e a posição para inserir/remover e observe o encadeamento. A seta entre nós é o
+          <code>next</code>; o último aponta para <code>null</code>. Repare que a posição de inserção aceita
+          <code>0..size</code> (inserir no fim é válido).
+        </p>
+        <div class="demo" id="listDemo">
+          <div class="demo-top">
+            <div class="demo-title">Lista simples interativa<small>modelo lógico; cada caixa é um nó</small></div>
+            <label class="field">Valor <input type="text" id="listValue" placeholder="ex.: 42" style="width:90px"></label>
+            <label class="field">Posição <input type="number" id="listPos" min="0" value="1" style="width:70px"></label>
+          </div>
+          <div class="node-viz" id="listViz"></div>
+          <div class="node-labels"><span>caixa escura = início (head)</span><span>next → próximo nó</span><span>null = fim</span></div>
+          <div class="node-msg" id="listMsg"></div>
+          <div class="controls">
+            <button class="btn" id="listAddStart">Inserir no início</button>
+            <button class="btn" id="listAddEnd">Inserir no fim</button>
+            <button class="btn soft" id="listInsert">Inserir na posição</button>
+            <button class="btn ghost" id="listRemove">Remover posição</button>
+            <button class="btn ghost" id="listClear">Esvaziar</button>
+          </div>
+        </div>
+
+        <h2 id="codigo"><span class="num">05</span> Código essencial</h2>
+        <p>
+          Primeiro a lista simples (arquivo <a href="../codigo/SimpleLinkedList.java">SimpleLinkedList.java</a>).
+          O descritor é representado por três campos: <code>inicio</code>, <code>fim</code> e
+          <code>size</code>. Essa classe é um complemento didático do guia: o repositório do professor
+          implementa a lista <strong>dupla</strong> com descritor, mostrada logo abaixo. Os arquivos linkados
+          são cópias fiéis; os blocos abaixo mantêm a mesma lógica, com comentários do guia.
+        </p>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SimpleLinkedList.java — inserir e remover</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public boolean insert(int position, T value) {
+    if (isFull() || position &lt; 0 || position &gt; size) {
+        return false;
+    }
+
+    SimpleNode&lt;T&gt; newNode = new SimpleNode&lt;&gt;(value);
+
+    if (position == 0) {
+        newNode.setNext(inicio);
+        inicio = newNode;
+        if (size == 0) {
+            fim = newNode;
+        }
+    } else {
+        SimpleNode&lt;T&gt; previous = nodeAt(position - 1);
+        newNode.setNext(previous.getNext());   // salva o resto
+        previous.setNext(newNode);             // só então religa
+        if (newNode.getNext() == null) {
+            fim = newNode;                     // inseriu no fim
+        }
+    }
+
+    size++;
+    return true;
+}
+
+public T remove(int position) throws OperationFailed {
+    if (position &lt; 0 || position &gt;= size) {
+        throw new OperationFailed();
+    }
+
+    SimpleNode&lt;T&gt; removed;
+    if (position == 0) {
+        removed = inicio;
+        inicio = inicio.getNext();
+        if (inicio == null) {
+            fim = null;
+        }
+    } else {
+        SimpleNode&lt;T&gt; previous = nodeAt(position - 1);
+        removed = previous.getNext();
+        previous.setNext(removed.getNext());
+        if (removed == fim) {
+            fim = previous;
+        }
+    }
+
+    removed.setNext(null);
+    size--;
+    return removed.getValue();
+}</code></pre>
+        </div>
+
+        <p>
+          Agora a lista dupla com descritor, que é a versão do repositório
+          (<a href="../codigo/LinkedLinearList.java">LinkedLinearList.java</a>). O ponto central é inserir
+          usando as extremidades quando possível e atualizar os dois sentidos:
+        </p>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">LinkedLinearList.java — insert</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public boolean insert(int position, T value) {
+    if (isFull() || position &lt; 0 || position &gt; descritor.getSize()) {
+        return false;
+    }
+
+    Node&lt;T&gt; newNode = new Node&lt;&gt;(position, value);
+
+    if (position == 0) {                       // início
+        newNode.setNext(descritor.getInicio());
+        if (descritor.getInicio() != null) {
+            descritor.getInicio().setPrev(newNode);
+        }
+        descritor.setInicio(newNode);
+        if (descritor.getSize() == 0) {
+            descritor.setFim(newNode);
+        }
+    } else if (position == descritor.getSize()) {   // fim: O(1) pelo descritor
+        newNode.setPrev(descritor.getFim());
+        descritor.getFim().setNext(newNode);
+        descritor.setFim(newNode);
+    } else {                                    // meio
+        Node&lt;T&gt; previous = nodeAt(position - 1);
+        Node&lt;T&gt; next = previous.getNext();
+        newNode.setPrev(previous);
+        newNode.setNext(next);
+        previous.setNext(newNode);
+        if (next != null) {
+            next.setPrev(newNode);
+        }
+    }
+
+    descritor.setSize(descritor.getSize() + 1);
+    return true;
+}</code></pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">LinkedLinearList.java — remove e nodeAt</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public T remove(int position) throws OperationFailed {
+    validatePosition(position);
+    Node&lt;T&gt; node = nodeAt(position);
+    Node&lt;T&gt; previous = node.getPrev();
+    Node&lt;T&gt; next = node.getNext();
+
+    if (previous == null) {          // era o primeiro
+        descritor.setInicio(next);
+    } else {
+        previous.setNext(next);
+    }
+    if (next == null) {              // era o último
+        descritor.setFim(previous);
+    } else {
+        next.setPrev(previous);
+    }
+
+    node.setPrev(null);
+    node.setNext(null);
+    descritor.setSize(descritor.getSize() - 1);
+    return node.getValue();
+}
+
+private Node&lt;T&gt; nodeAt(int position) {
+    if (position &lt; 0 || position &gt;= descritor.getSize()) {
+        throw new IndexOutOfBoundsException("Posição inválida: " + position);
+    }
+    Node&lt;T&gt; current;
+    if (position &lt; descritor.getSize() / 2) {   // mais perto do início
+        current = descritor.getInicio();
+        for (int i = 0; i &lt; position; i++) current = current.getNext();
+    } else {                                     // mais perto do fim
+        current = descritor.getFim();
+        for (int i = descritor.getSize() - 1; i &gt; position; i--) current = current.getPrev();
+    }
+    return current;
+}</code></pre>
+        </div>
+        <p class="small muted">
+          Note que <code>nodeAt</code> não vira O(1): ele apenas percorre a partir da extremidade mais
+          próxima, reduzindo o trabalho pela metade. A complexidade continua O(n).
+        </p>
+
+        <h2 id="complexidade"><span class="num">06</span> Comparação de custos</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Operação</th><th>Sequencial</th><th>Simples s/ descritor</th><th>Simples c/ descritor</th><th>Dupla c/ descritor</th></tr></thead>
+            <tbody>
+              <tr><td>Acessar posição <code>get(i)</code></td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(n)</td></tr>
+              <tr><td>Buscar valor</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(n)</td></tr>
+              <tr><td>Inserir no início</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+              <tr><td>Inserir no fim</td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+              <tr><td>Remover do início</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+              <tr><td>Remover do fim</td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(1)</td></tr>
+              <tr><td>Remover nó conhecido</td><td class="c">O(n)</td><td class="c">O(n)*</td><td class="c">O(n)*</td><td class="c">O(1)</td></tr>
+              <tr><td>Tamanho <code>size()</code></td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">* Na lista simples, remover um nó “conhecido” ainda exige o anterior. Se você já tiver a referência do anterior, a religação é O(1).</p>
+
+        <h3>Sequencial × encadeada: o resumo que cai</h3>
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">Sequencial</h4>
+            <ul class="mb0">
+              <li>Memória contígua e acesso O(1).</li>
+              <li>Deslocamentos ao inserir/remover no início.</li>
+              <li>Capacidade fixa (ou realocação cara).</li>
+              <li>Menos overhead por elemento.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 class="mt0">Encadeada</h4>
+            <ul class="mb0">
+              <li>Nós espalhados, ligados por ponteiros.</li>
+              <li>Inserir/remover nas extremidades é O(1).</li>
+              <li>Acesso por posição exige percorrer: O(n).</li>
+              <li>Gasta ponteiro(s) por nó; na implementação da disciplina, tem capacidade fixa.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>A lista encadeada do professor também enche</strong>
+            <p class="mb0">A <code>LinkedLinearList</code> do <code>ed20262</code> recebe <code>capacity</code> no
+            construtor e tem <code>isFull()</code>; <code>add</code>/<code>insert</code> retornam
+            <code>false</code> quando <code>size == capacity</code>. Então não responda “lista encadeada nunca
+            enche”: <em>na teoria</em> ela cresce sob demanda, mas <em>nessa classe</em> há limite. Quem enche é
+            o vetor da lista sequencial; a encadeada da disciplina tem limite explícito.</p>
+          </div>
+        </div>
+
+        <h2 id="exercicios"><span class="num">07</span> Exercícios de fixação</h2>
+
+        <details class="examq">
+          <summary>1. Desenhe a lista simples <code>[10] → [20]</code> após <code>insertAtBeginning(5)</code> e depois <code>add(30)</code>.</summary>
+          <div class="details-body">
+            <pre class="ascii mb0">início → [5] → [10] → [20] → null
+depois add(30): início → [5] → [10] → [20] → [30] → null
+fim passa a apontar para o nó 30 (se houver descritor).</pre>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>2. Na lista <code>[10] → [20] → [30]</code>, escreva os comandos para remover o 20.</summary>
+          <div class="details-body">
+            <p class="mb0">Suponha <code>anterior</code> apontando para o nó 10 e <code>alvo</code> para o 20:
+            <code>anterior.next = alvo.next;</code>. O 10 passa a apontar para o 30. Se <code>alvo</code> fosse
+            o último, o <code>fim</code> viraria <code>anterior</code>.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>3. Por que a lista dupla remove um nó conhecido em O(1), e a simples não?</summary>
+          <div class="details-body">
+            <p class="mb0">Na dupla, o nó tem <code>prev</code>, então o anterior é acessível direto:
+            <code>x.prev.next = x.next; x.next.prev = x.prev</code>. Na simples, para achar o anterior é
+            preciso percorrer desde o início, O(n) — a menos que você já tenha essa referência.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>4. Qual é o custo de <code>add</code> (fim) em uma lista simples <strong>sem</strong> e <strong>com</strong> descritor?</summary>
+          <div class="details-body">
+            <p class="mb0">Sem descritor: O(n), pois é preciso caminhar até o último nó para descobrir o fim.
+            Com descritor: O(1), pois <code>fim</code> já aponta para o último nó.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>5. Ache o bug no código de remoção de uma lista dupla:<br><code>x.prev.next = x.next; size--;</code></summary>
+          <div class="details-body">
+            <p class="mb0">Faltou atualizar o sentido de volta:
+            <code>x.next.prev = x.prev;</code> (quando <code>x.next != null</code>). Também é preciso
+            atualizar <code>inicio</code>/<code>fim</code> se x era extremidade e verificar
+            <code>x.prev != null</code>. Sem isso, a lista fica inconsistente e o percurso inverso quebra.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>6. O descritor torna <code>get(5)</code> O(1)? Justifique.</summary>
+          <div class="details-body">
+            <p class="mb0">Não. O descritor guarda apenas as extremidades e o tamanho. Para chegar à posição 5,
+            ainda é preciso seguir <code>next</code> (ou <code>prev</code>) nó a nó. O custo melhora de n para
+            cerca de n/2, mas continua O(n).</p>
+          </div>
+        </details>
+
+        <div class="callout tip">
+          <span class="ico">✅</span>
+          <div>
+            <strong>Checklist antes de seguir</strong>
+            <p class="mb0">Sem olhar, você consegue: (1) desenhar uma inserção depois de <code>p</code>;
+            (2) remover o primeiro nó; (3) atualizar os dois ponteiros na dupla; (4) explicar o que o
+            descritor melhora; (5) dizer por que <code>get</code> continua O(n).</p>
+          </div>
+        </div>
+
+        <div class="done-box">
+          <label><input type="checkbox" data-progress="encadeada"> Concluí esta página</label>
+          <span class="done-hint">O progresso fica salvo neste navegador.</span>
+        </div>
+
+        <div class="page-nav">
+          <a href="listas-sequenciais.html"><span class="pn-lbl">← Anterior</span><span class="pn-title">Listas sequenciais</span></a>
+          <a class="next" href="pilhas.html"><span class="pn-lbl">Próximo →</span><span class="pn-title">Pilhas</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Código completo em <a href="../codigo/LinkedLinearList.java">codigo/LinkedLinearList.java</a></span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/estruturas.js"></script>
+</body>
+</html>

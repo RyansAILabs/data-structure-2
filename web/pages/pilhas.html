@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pilhas — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Pilhas (LIFO): push, pop, peek, implementação com vetor e lista, avaliação pós-fixa, parênteses balanceados e conversão infixa para pós-fixa.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="pilhas" data-root="../" data-topic="pilhas">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Pilhas</div>
+        <span class="eyebrow">Bloco 4 · muito provável</span>
+        <h1>Pilhas (LIFO)</h1>
+        <p class="lead">
+          Pilha é a estrutura do “último que entra, primeiro que sai”. É uma lista com regra de acesso:
+          você só mexe no <strong>topo</strong>. Com essa restrição simples, resolve três clássicos da prova:
+          parênteses balanceados, avaliação de expressão pós-fixa e conversão de infixa para pós-fixa.
+        </p>
+        <div class="meta-row">
+          <span class="pill rose">~30 min de estudo</span>
+          <span class="pill">LIFO</span>
+          <span class="pill">pós-fixa</span>
+          <span class="pill">código Java testado</span>
+        </div>
+
+        <div class="toc" data-toc></div>
+
+        <h2 id="modelo"><span class="num">01</span> O modelo LIFO</h2>
+        <p>
+          <strong>LIFO</strong> = Last In, First Out. O único elemento visível é o <strong>topo</strong>.
+          <code>push</code> empilha no topo; <code>pop</code> desempilha do topo; <code>peek</code> consulta
+          o topo sem remover. O fundo da pilha fica inacessível até os de cima saírem.
+        </p>
+        <pre class="ascii">push(10)   push(20)   push(30)        pop() → 30      pop() → 20
+   │          │          │ topo           │               │
+   ▼          ▼          ▼                ▼               ▼
+┌─────┐    ┌─────┐    ┌─────┐          ┌─────┐         ┌─────┐
+│ 10  │    │ 20  │    │ 30  │          │ 20  │         │ 10  │
+├─────┤    ├─────┤    ├─────┤          ├─────┤         ├─────┤
+│     │    │ 10  │    │ 10  │          │ 10  │         │     │
+└─────┘    └─────┘    └─────┘          └─────┘         └─────┘</pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Operação</th><th>Efeito</th><th class="c">Custo</th></tr></thead>
+            <tbody>
+              <tr><td><code>push(v)</code></td><td>insere no topo</td><td class="c">O(1)</td></tr>
+              <tr><td><code>pop()</code></td><td>remove e retorna o topo; erro se vazia</td><td class="c">O(1)</td></tr>
+              <tr><td><code>peek()</code></td><td>consulta o topo sem remover</td><td class="c">O(1)</td></tr>
+              <tr><td><code>isEmpty()</code> / <code>isFull()</code></td><td>estado da pilha</td><td class="c">O(1)</td></tr>
+              <tr><td><code>size()</code></td><td>quantidade de elementos</td><td class="c">O(1)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="demo"><span class="num">02</span> Teste você mesmo</h2>
+        <p>
+          Empilhe e desempilhe para sentir o LIFO. O topo aparece destacado e com a seta. Tente remover de
+          uma pilha vazia: a implementação acusa <em>underflow</em>.
+        </p>
+        <div class="demo" id="stackDemo">
+          <div class="demo-top">
+            <div class="demo-title">Pilha interativa<small>capacidade 8 · topo no alto</small></div>
+            <label class="field">Valor <input type="text" id="stackValue" placeholder="ex.: 42" style="width:90px"></label>
+            <span class="pill">ocupação: <b id="stackCount">0 / 8</b></span>
+          </div>
+          <div class="stack-viz" id="stackViz"></div>
+          <div class="node-msg" id="stackMsg"></div>
+          <div class="controls">
+            <button class="btn" id="stackPush">push(valor)</button>
+            <button class="btn soft" id="stackPop">pop()</button>
+            <button class="btn ghost" id="stackPeek">peek()</button>
+            <button class="btn ghost" id="stackClear">Esvaziar</button>
+          </div>
+        </div>
+
+        <h2 id="implementacoes"><span class="num">03</span> Como implementar</h2>
+        <h3>Com lista encadeada (versão do professor)</h3>
+        <p>
+          A pilha é uma <strong>especialização</strong> da lista: <code>push</code> é inserir no fim,
+          <code>pop</code> é remover do fim e <code>peek</code> é consultar o fim. Com descritor, as três
+          operações são O(1).
+        </p>
+        <p class="small muted">Os arquivos linkados nesta página são cópias fiéis do repositório do professor;
+        os blocos de código mostram os mesmos métodos com comentários do guia.</p>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">Stack.java — completa</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public class Stack&lt;T&gt; extends LinkedLinearList&lt;T&gt; {
+
+    public Stack(int capacity) {
+        super(capacity);
+    }
+
+    public boolean push(T value) {
+        return add(value);              // insere no fim da lista
+    }
+
+    @Override
+    public T pop() throws OperationFailed {
+        return removeLast();            // remove do fim = topo
+    }
+
+    @Override
+    public void display() {
+        super.display();
+    }
+
+    public T peek() throws OperationFailed {
+        if (isEmpty()) {
+            throw new OperationFailed();
+        }
+        return get(size() - 1);         // último elemento
+    }
+}</code></pre>
+        </div>
+
+        <h3>Com vetor (top = índice do topo)</h3>
+        <p class="small muted">A pilha com vetor (<code>SequentialStack.java</code>) é um complemento do
+        guia; o repositório do professor implementa a pilha sobre a lista encadeada com descritor.</p>
+        <p>
+          O vetor guarda os elementos de baixo para cima. <code>top</code> começa em −1 (vazia); ao dar push,
+          incrementa e grava; ao dar pop, lê <code>data[top]</code> e decrementa. É a implementação mais
+          provável de aparecer em questão de “complete o código”.
+        </p>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SequentialStack.java — push e pop</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public boolean push(T value) {
+    if (isFull()) {          // top == data.length - 1
+        return false;
+    }
+    data[++top] = value;     // primeiro incrementa, depois grava
+    return true;
+}
+
+public T pop() throws OperationFailed {
+    if (isEmpty()) {         // top == -1
+        throw new OperationFailed();
+    }
+    T value = (T) data[top];
+    data[top] = null;
+    top--;
+    return value;
+}
+
+public T peek() throws OperationFailed {
+    if (isEmpty()) {
+        throw new OperationFailed();
+    }
+    return (T) data[top];
+}</code></pre>
+        </div>
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>Vetor: cuidado com a ordem</strong>
+            <p class="mb0">No push, use <code>data[++top] = value</code> (pré-incremento). Se usar
+            <code>data[top++]</code>, grava na posição antiga e deixa o topo apontando para a posição errada.
+            No pop, leia antes de decrementar.</p>
+          </div>
+        </div>
+
+        <h2 id="parenteses"><span class="num">04</span> Aplicação 1: parênteses balanceados</h2>
+        <p>
+          Cada fechamento deve casar com o <strong>último símbolo aberto</strong> — comportamento LIFO.
+          Ao encontrar uma abertura, empilhe. Ao encontrar um fechamento, desempilhe e verifique se combina.
+          No fim, a pilha deve estar vazia.
+        </p>
+        <p class="small muted">A implementação abaixo é um complemento do guia: o repositório do
+        professor não traz esse algoritmo pronto, mas ele é o exemplo clássico de uso de pilha.</p>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">BalancedParentheses.java</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public static boolean isBalanced(String expression) throws OperationFailed {
+    Stack&lt;Character&gt; stack = new Stack&lt;&gt;(expression.length() + 1);
+
+    for (int i = 0; i &lt; expression.length(); i++) {
+        char c = expression.charAt(i);
+        if (c == '(' || c == '[' || c == '{') {
+            stack.push(c);
+        } else if (c == ')' || c == ']' || c == '}') {
+            if (stack.isEmpty()) {
+                return false;              // fechou sem abrir
+            }
+            char top = stack.pop();
+            if (!matches(top, c)) {
+                return false;              // abriu um, fechou outro
+            }
+        }
+    }
+    return stack.isEmpty();                // sobrou abertura? falso
+}</code></pre>
+        </div>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>Expressão</th><th>Leitura</th><th>Pilha após</th><th>Resultado</th></tr></thead>
+            <tbody>
+              <tr><td><code>{ [ ( ) ] }</code></td><td><code>)</code></td><td><code>{ [</code></td><td class="ok">casou com (</td></tr>
+              <tr><td><code>{ [ ( ) ] }</code></td><td><code>]</code></td><td><code>{</code></td><td class="ok">casou com [</td></tr>
+              <tr><td><code>{ [ ( ) ] }</code></td><td><code>}</code></td><td>vazia</td><td class="ok">balanceado</td></tr>
+              <tr><td><code>[ ( ] )</code></td><td><code>]</code></td><td><code>[ (</code></td><td class="sw">falha: topo é (, não [</td></tr>
+              <tr><td><code>( ( )</code></td><td>fim</td><td><code>(</code></td><td class="sw">falha: sobrou abertura</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="posfixa"><span class="num">05</span> Aplicação 2: avaliar pós-fixa</h2>
+        <p>
+          Na notação pós-fixa (polonesa reversa), o operador vem <strong>depois</strong> dos operandos:
+          <code>6 2 3 * -</code> significa <code>6 − (2 × 3)</code>. A regra é simples: número → empilha;
+          operador → desempilha <strong>dois</strong>, aplica e empilha o resultado. No fim, sobra um valor.
+        </p>
+        <div class="callout info">
+          <span class="ico">ℹ️</span>
+          <div>
+            <strong>O que está no repositório</strong>
+            <p class="mb0">O exemplo <code>PostFixed.java</code> do professor é uma versão mínima: recebe uma
+            pilha com exatamente três caracteres (dois operandos e um operador) e trata apenas
+            <code>+</code> e <code>−</code>. O <code>PostfixEvaluator.java</code> deste guia generaliza a
+            mesma ideia para expressões com vários tokens e os quatro operadores. Para a prova, use a regra
+            geral — e, se o enunciado pedir o código do professor, respeite a limitação de três
+            caracteres.</p>
+          </div>
+        </div>
+        <div class="callout danger">
+          <span class="ico">🚨</span>
+          <div>
+            <strong>A ordem dos operandos é a pegadinha número 1</strong>
+            <p class="mb0">O <strong>primeiro</strong> pop é o operando da <strong>direita</strong>; o
+            <strong>segundo</strong> é o da <strong>esquerda</strong>. Para <code>8 3 -</code>, faça
+            <code>segundo − primeiro = 8 − 3 = 5</code>. Se inverter, obtém −5 e perde a questão. Vale para
+            <code>-</code> e <code>/</code>.</p>
+          </div>
+        </div>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">PostfixEvaluator.java — trecho central</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>for (String token : tokens) {
+    if (token.length() == 1 &amp;&amp; "+-*/".contains(token)) {
+        long right = stack.pop();       // primeiro pop = direita
+        long left = stack.pop();        // segundo pop = esquerda
+        long result;
+        switch (token.charAt(0)) {
+            case '+': result = left + right; break;
+            case '-': result = left - right; break;
+            case '*': result = left * right; break;
+            case '/':
+                if (right == 0) {
+                    throw new ArithmeticException("Divisão por zero");
+                }
+                result = left / right;
+                break;
+            default:
+                throw new IllegalArgumentException("Operador inválido: " + token);
+        }
+        stack.push(result);
+    } else {
+        stack.push(Long.parseLong(token));
+    }
+}
+return stack.pop();</code></pre>
+        </div>
+
+        <h3>Traço de <code>6 2 3 * - 4 +</code></h3>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>Token</th><th>Ação</th><th>Pilha após (topo à direita)</th></tr></thead>
+            <tbody>
+              <tr><td>6</td><td>empilha</td><td>[6]</td></tr>
+              <tr><td>2</td><td>empilha</td><td>[6, 2]</td></tr>
+              <tr><td>3</td><td>empilha</td><td>[6, 2, 3]</td></tr>
+              <tr><td>*</td><td>pop 3 e 2 → 2*3 = 6; empilha</td><td>[6, 6]</td></tr>
+              <tr><td>-</td><td>pop 6 e 6 → 6−6 = 0; empilha</td><td>[0]</td></tr>
+              <tr><td>4</td><td>empilha</td><td>[0, 4]</td></tr>
+              <tr><td>+</td><td>pop 4 e 0 → 0+4 = 4; empilha</td><td>[4]</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Resultado: <strong>4</strong>. A expressão equivale a <code>(6 − (2×3)) + 4</code>.</p>
+
+        <h2 id="infixa"><span class="num">06</span> Aplicação 3: infixa → pós-fixa</h2>
+        <p>
+          A conversão usa uma pilha de <strong>operadores</strong> e uma saída. Regras simplificadas
+          (operadores <code>+ − * /</code>, sem parênteses):
+        </p>
+        <div class="callout info">
+          <span class="ico">ℹ️</span>
+          <div>
+            <strong>O <code>Convert</code> do repositório não é o algoritmo clássico</strong>
+            <p class="mb0">O arquivo <code>Convert.java</code> do professor apenas separa os caracteres de
+            posições pares e ímpares em duas pilhas e remonta a expressão; ele não implementa precedência
+            nem parênteses. A regra abaixo é a conversão clássica (shunting-yard) que a prova costuma pedir.
+            Não confunda os dois: o <code>Convert</code> do repo é um exercício de pilha, não um conversor
+            geral.</p>
+          </div>
+        </div>
+        <ol>
+          <li><strong>Operando</strong> → vai direto para a saída.</li>
+          <li><strong>Operador</strong> → enquanto o topo tiver precedência <em>maior ou igual</em>, desempilhe para a saída; depois empilhe o novo.</li>
+          <li><strong>Fim</strong> → desempilhe todo o resto para a saída.</li>
+        </ol>
+        <p>Precedência: <code>*</code> e <code>/</code> (2) vêm antes de <code>+</code> e <code>−</code> (1).</p>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>Token</th><th>Pilha de operadores</th><th>Saída</th></tr></thead>
+            <tbody>
+              <tr><td>A</td><td></td><td>A</td></tr>
+              <tr><td>+</td><td>+</td><td>A</td></tr>
+              <tr><td>B</td><td>+</td><td>A B</td></tr>
+              <tr><td>*</td><td>+ *</td><td>A B</td></tr>
+              <tr><td>C</td><td>+ *</td><td>A B C</td></tr>
+              <tr><td>−</td><td>−</td><td>A B C * +</td></tr>
+              <tr><td>D</td><td>−</td><td>A B C * + D</td></tr>
+              <tr><td>fim</td><td>vazia</td><td>A B C * + D −</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">No <code>−</code>, desempilha <code>*</code> e <code>+</code> (precedências ≥) antes de empilhar o <code>−</code>. Resultado: <code>ABC*+D-</code>.</p>
+        <div class="callout info">
+          <span class="ico">ℹ️</span>
+          <div>
+            <strong>Com parênteses</strong>
+            <p class="mb0">Ao encontrar <code>(</code>, empilhe. Ao encontrar <code>)</code>, desempilhe para a saída até achar o <code>(</code> e descarte-o. O restante é igual. Se a prova pedir só uma expressão simples, a tabela acima já cobre.</p>
+          </div>
+        </div>
+
+        <h2 id="outras"><span class="num">07</span> Onde mais se usa pilha</h2>
+        <div class="grid grid-3">
+          <div class="card"><h4 class="mt0">↩️ Undo/redo</h4><p class="mb0">Cada ação é empilhada; desfazer remove a mais recente.</p></div>
+          <div class="card"><h4 class="mt0">🧮 Chamadas de função</h4><p class="mb0">A call stack guarda retorno e variáveis locais; recursão usa pilha.</p></div>
+          <div class="card"><h4 class="mt0">🧭 DFS / backtracking</h4><p class="mb0">Explorar um caminho e voltar é naturalmente LIFO.</p></div>
+          <div class="card"><h4 class="mt0">🌐 Histórico do navegador</h4><p class="mb0">“Voltar” desempilha a página mais recente.</p></div>
+          <div class="card"><h4 class="mt0">🧩 Validar HTML/XML</h4><p class="mb0">Tags abrem e fecham na ordem inversa, como parênteses.</p></div>
+          <div class="card"><h4 class="mt0">🔁 Inverter ordem</h4><p class="mb0">Empilhar tudo e desempilhar produz a sequência reversa.</p></div>
+        </div>
+
+        <h2 id="exercicios"><span class="num">08</span> Exercícios de fixação</h2>
+
+        <details class="examq">
+          <summary>1. <code>push(10)</code>, <code>push(20)</code>, <code>push(30)</code>, <code>pop()</code>, <code>pop()</code>. Quais valores saem e o que resta?</summary>
+          <div class="details-body">
+            <p class="mb0">Saem <strong>30</strong> e depois <strong>20</strong>. Resta o <strong>10</strong> no fundo.
+            Essa é a definição de LIFO.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>2. Avalie <code>5 1 2 + 4 * + 3 -</code>.</summary>
+          <div class="details-body">
+            <p><code>1 2 +</code> → 3; pila [5, 3]. <code>4 *</code> → 3*4 = 12; pila [5, 12].
+            <code>+</code> → 5+12 = 17. <code>3 -</code> → 17−3 = 14.</p>
+            <p class="mb0"><strong>Resultado: 14.</strong> Equivale a <code>5 + (1+2)*4 − 3</code>.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>3. Qual é a forma pós-fixa de <code>(A + B) * C</code>?</summary>
+          <div class="details-body">
+            <p class="mb0">Os parênteses forçam a soma primeiro: <code>A B + C *</code>. Sem parênteses,
+            <code>A + B * C</code> seria <code>A B C * +</code>. A posição do <code>+</code> muda tudo.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>4. A expressão <code>[ ( ] )</code> está balanceada? Onde falha?</summary>
+          <div class="details-body">
+            <p class="mb0">Não. Ao ler <code>]</code>, o topo é <code>(</code>; não casa. O algoritmo retorna
+            falso imediatamente. Mesmo que o restante fechasse, a ordem já foi violada.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>5. Com pushes 1, 2, 3, 4 (nesta ordem), a sequência de pops <code>2, 1, 4, 3</code> é possível?</summary>
+          <div class="details-body">
+            <p class="mb0">Sim: push 1, push 2, pop (2), pop (1), push 3, push 4, pop (4), pop (3).
+            Já <code>3, 1, 2</code> não é possível: para tirar 3, 1 e 2 já estão empilhados, e o topo seria 2,
+            não 1.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>6. Escreva <code>peek()</code> para a pilha com vetor e explique por que não pode ser O(1) se a pilha for uma lista simples sem descritor.</summary>
+          <div class="details-body">
+            <p><code>return (T) data[top];</code> (checando isEmpty antes). Com vetor, é O(1).</p>
+            <p class="mb0">Com lista simples sem descritor, o topo é o último nó; para achá-lo é preciso
+            percorrer a lista, O(n). Com descritor (<code>fim</code>), volta a O(1).</p>
+          </div>
+        </details>
+
+        <div class="callout tip">
+          <span class="ico">✅</span>
+          <div>
+            <strong>Checklist antes de seguir</strong>
+            <p class="mb0">Você consegue: (1) dizer o que sai de uma sequência de pushes/pops; (2) avaliar
+            pós-fixa sem inverter operandos; (3) converter uma expressão com <code>+ − * /</code>;
+            (4) explicar o algoritmo de parênteses; (5) implementar push/pop com vetor e com lista.</p>
+          </div>
+        </div>
+
+        <div class="done-box">
+          <label><input type="checkbox" data-progress="pilhas"> Concluí esta página</label>
+          <span class="done-hint">O progresso fica salvo neste navegador.</span>
+        </div>
+
+        <div class="page-nav">
+          <a href="listas-encadeadas.html"><span class="pn-lbl">← Anterior</span><span class="pn-title">Listas encadeadas</span></a>
+          <a class="next" href="filas.html"><span class="pn-lbl">Próximo →</span><span class="pn-title">Filas</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Código completo em <a href="../codigo/Stack.java">codigo/Stack.java</a></span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/estruturas.js"></script>
+</body>
+</html>

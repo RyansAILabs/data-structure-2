@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ordenação simples — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Bubble Sort, Insertion Sort e Selection Sort: traço passo a passo, código Java, complexidade e estabilidade.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="ordenacao" data-root="../" data-topic="ordenacao">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Ordenação simples</div>
+        <span class="eyebrow">Bloco 1 · presença quase certa</span>
+        <h1>Algoritmos de ordenação simples</h1>
+        <p class="lead">
+          Bubble, Insertion e Selection resolvem o mesmo problema de formas diferentes. Na prova, o que
+          importa é saber <strong>traçar o vetor</strong>, contar comparações e trocas, justificar a
+          complexidade e reconhecer o algoritmo pelo código. É exatamente isso que esta página treina.
+        </p>
+        <div class="meta-row">
+          <span class="pill amber">~35 min de estudo</span>
+          <span class="pill">O(n²) no pior caso</span>
+          <span class="pill">in-place</span>
+          <span class="pill">código Java testado</span>
+        </div>
+
+        <div class="toc" data-toc></div>
+
+        <div class="callout info">
+          <span class="ico">🧠</span>
+          <div>
+            <strong>Modelo mental para levar para a prova</strong>
+            <p><strong>Bubble:</strong> o maior “borbulha” para o fim, uma posição por passada.<br>
+            <strong>Insertion:</strong> você tem um prefixo ordenado e encaixa a próxima carta na mão.<br>
+            <strong>Selection:</strong> procura o menor do resto e o coloca na posição atual.</p>
+            <p class="mb0">Os três são <strong>in-place</strong> (usam O(1) de memória extra) e <strong>O(n²)</strong> no pior caso. As diferenças estão no melhor caso, no número de trocas e na estabilidade.</p>
+          </div>
+        </div>
+
+        <h2 id="complexidade"><span class="num">01</span> Complexidade em 5 minutos</h2>
+        <p>
+          Big-O descreve como o custo <em>cresce</em> quando o tamanho da entrada <code>n</code> aumenta.
+          Para ordenação, contamos principalmente <strong>comparações</strong> e <strong>trocas</strong>
+          (ou movimentações).
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Notação</th><th>Significado</th><th>Exemplo típico</th></tr></thead>
+            <tbody>
+              <tr><td><code class="formula">O(1)</code></td><td>custo constante, não depende de n</td><td>acessar <code>v[i]</code>, push em pilha encadeada</td></tr>
+              <tr><td><code class="formula">O(log n)</code></td><td>a cada passo o problema cai pela metade</td><td>busca binária</td></tr>
+              <tr><td><code class="formula">O(n)</code></td><td>visita cada elemento uma vez</td><td>percorrer lista, busca linear, melhor caso do Bubble/Insertion</td></tr>
+              <tr><td><code class="formula">O(n²)</code></td><td>para cada elemento, olha (quase) todos os outros</td><td>Bubble, Insertion e Selection no pior caso</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">
+          Regra prática para a prova: dois laços aninhados percorrendo n → O(n²). Um laço → O(n). Sem laço,
+          acesso direto → O(1). O melhor caso do Bubble/Insertion é O(n) porque o vetor já está ordenado.
+        </p>
+
+        <h2 id="visualizador"><span class="num">02</span> Visualizador passo a passo</h2>
+        <p>
+          Escolha o algoritmo, gere um vetor e avance <strong>uma comparação por vez</strong>. As barras
+          verdes são posições já finalizadas; amarelo indica comparação; vermelho, troca. Repare que o
+          Insertion cresce um prefixo ordenado, enquanto o Bubble fixa o fim e o Selection fixa o começo.
+        </p>
+
+        <div class="demo" id="sortDemo">
+          <div class="demo-top">
+            <div class="demo-title">Ordenação animada<small>passo a passo, com contadores reais</small></div>
+            <label class="field" for="sortAlgo">Algoritmo
+              <select id="sortAlgo">
+                <option value="bubble">Bubble Sort</option>
+                <option value="insertion">Insertion Sort</option>
+                <option value="selection">Selection Sort</option>
+              </select>
+            </label>
+            <label class="field" for="sortSize">Tamanho
+              <input type="range" id="sortSize" min="5" max="18" value="10">
+            </label>
+            <label class="field" for="sortSpeed">Velocidade
+              <input type="range" id="sortSpeed" min="1" max="10" value="5">
+            </label>
+          </div>
+
+          <div class="bars" id="sortBars" role="img" aria-label="Vetor sendo ordenado"></div>
+          <div class="demo-status" id="sortStats"></div>
+          <div class="demo-note" id="sortNote"></div>
+
+          <div class="controls">
+            <button class="btn" id="sortPlay">▶ Tocar</button>
+            <button class="btn ghost" id="sortStep">Próximo passo</button>
+            <button class="btn ghost" id="sortBack">← Voltar</button>
+            <button class="btn ghost" id="sortReset">Reiniciar</button>
+            <button class="btn soft" id="sortRandom">🎲 Novo vetor</button>
+          </div>
+
+          <div class="legend">
+            <span><i style="background:var(--accent)"></i> normal</span>
+            <span><i style="background:var(--amber)"></i> comparando</span>
+            <span><i style="background:var(--rose)"></i> trocando</span>
+            <span><i style="background:var(--green)"></i> finalizado</span>
+            <span>movimentações: <b id="sortLegendNote">trocas</b></span>
+          </div>
+        </div>
+        <p class="small muted">O visualizador usa Bubble com escopo reduzido — exatamente o <code>sortO()</code> do
+        repositório — e Selection clássico com <code>minIndex</code> (a versão corrigida do guia). O
+        <code>sort()</code> do repositório, que troca a cada valor menor, aparece na seção 05 com seu próprio traço.</p>
+
+        <h2 id="bubble"><span class="num">03</span> Bubble Sort</h2>
+        <p>
+          Compare pares vizinhos e troque se estiverem fora de ordem. Ao final de uma passada, o
+          <strong>maior elemento do trecho</strong> chegou à última posição. Se uma passada inteira não
+          tiver trocas, o vetor já está ordenado e podemos parar.
+        </p>
+        <p>
+          O arquivo <code>BubbleSort.java</code> do repositório tem <strong>três</strong> versões. Os nomes
+          importam: a prova pode pedir “o que faz o <code>sortO2()</code>?”. Os três métodos abaixo estão
+          copiados <strong>sem nenhuma alteração</strong> de <code>ed20261/Exemplos/Ordenação/BubbleSort</code>.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Método</th><th>O que faz</th><th class="c">Comparações</th><th class="c">Trocas</th></tr></thead>
+            <tbody>
+              <tr><td><code>sort()</code></td><td>escopo <strong>fixo</strong>: <code>currentSize</code> nunca diminui; repete a passada inteira</td><td class="c">25</td><td class="c">8</td></tr>
+              <tr><td><code>sortO()</code></td><td>escopo <strong>reduzido</strong>: <code>currentSize--</code> a cada passada (o laço começa em 0)</td><td class="c">15</td><td class="c">8</td></tr>
+              <tr><td><code>sortO2()</code></td><td>mistura bolha com seleção do mínimo (<code>minLimit</code>); é a mesma ideia da classe <code>MinMaxSort</code></td><td class="c">9</td><td class="c">10</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Números medidos no vetor <code>[5, 3, 8, 1, 9, 2]</code> com
+        <code>codigo/BubbleSortMetrics.java</code> (cópia instrumentada; a lógica é idêntica). O nome
+        <code>sortOptimized()</code> que o guia usava antes <strong>não existe no repositório</strong> — aquela
+        versão é o <code>sortO()</code>. Não troque os nomes na prova.</p>
+        <pre class="ascii">Passada 1:  <b>[5</b>  3  <b>8</b>  1  9  2]      compara 5 e 3 → troca
+            [3  <b>5</b>  <b>8</b>  1  9  2]      compara 5 e 8 → ok
+            [3  5  <b>8</b>  <b>1</b>  9  2]      compara 8 e 1 → troca
+            [3  5  1  <b>8</b>  <b>9</b>  2]      compara 8 e 9 → ok
+            [3  5  1  8  <b>9</b>  <b>2</b>]      compara 9 e 2 → troca
+            [3  5  1  8  2 | 9]      o 9 está no lugar definitivo</pre>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">BubbleSort.java — sort() (escopo fixo) · cópia fiel do repo</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sort() {
+    boolean changed = true;
+    // Otimização: reduz o escopo a cada passada, pois o maior elemento "flutua"
+    // para o fim
+    int currentSize = this.size;
+
+    while (changed) {
+        changed = false;
+        for (int i = 0; i &lt; currentSize - 1; i++) {
+            if (this.array[i] &gt; this.array[i + 1]) {
+                this.swap(i, i + 1);
+                changed = true;
+            }
+        }
+    }
+}</code></pre>
+        </div>
+        <p class="table-note">Repare: o comentário fala em “reduzir o escopo”, mas nesta versão
+        <code>currentSize</code> <strong>não muda</strong>. Quem reduz é o <code>sortO()</code>.</p>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">BubbleSort.java — sortO() (escopo reduzido) · cópia fiel do repo</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sortO() {
+    boolean changed = true;
+    // Otimização: reduz o escopo a cada passada, pois o maior elemento "flutua"
+    // para o fim
+    int currentSize = this.size;
+    int i = 0;
+    int totalTimes = 0;
+    while (changed) {
+        changed = false;
+        for (i = 0; i &lt; (currentSize - 1); i++) {
+            if (this.array[i] &gt; this.array[i + 1]) {
+                this.swap(i, i + 1);
+                changed = true;
+            }
+        }
+        currentSize = currentSize - 1; // limit-- -&gt; limit = limit - 1
+        totalTimes += i;
+    }
+    System.out.println("\n\nArray valido: " + this.validate());
+    System.out.println("\n\n\nTotal = " + totalTimes);
+}</code></pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">BubbleSort.java — sortO2() (bolha + mínimo) · cópia fiel do repo</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sortO2() {
+    boolean changed = true;
+    // Otimização: reduz o escopo a cada passada, pois o maior elemento "flutua"
+    // para o fim
+    int currentSize = this.size;
+    int i = 0;
+    int minLimit = 0;
+    int totalTimes = 0;
+    int minValueIndex = 0;
+    int times = 0;
+    while (changed) {
+        changed = false;
+        minValueIndex = minLimit;
+        i = minLimit;
+        for (times = 0; i &lt; (currentSize - 1); i++,times++) {
+            if (this.array[i] &gt; this.array[i + 1]) {
+                this.swap(i, i + 1);
+                changed = true;
+            }
+            if (this.array[i] &lt; this.array[minValueIndex]) {
+                minValueIndex = i;
+            }
+        }
+        swap(minValueIndex, minLimit);
+        currentSize = currentSize - 1; // limit-- -&gt; limit = limit - 1
+        totalTimes += times;
+        minLimit = minLimit + 1;
+    }
+
+    System.out.println("\n\n\nTotal = " + totalTimes);
+}</code></pre>
+        </div>
+        <p class="table-note">O <code>sortO2()</code> faz a troca final <code>swap(minValueIndex, minLimit)</code>
+        mesmo quando o trecho já acabou. Com vetor vazio isso estoura
+        (<code>ArrayIndexOutOfBoundsException</code> em <code>swap(0, 0)</code>), e a <code>MinMaxSort</code>
+        tem exatamente o mesmo comportamento. Não é bug de digitação: é o código do repositório.</p>
+
+        <h3>Traço de <code>sortO()</code> em <code>[5, 3, 8, 1, 9, 2]</code></h3>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>Passada</th><th>Vetor ao final</th><th class="c">Comparações (acum.)</th><th class="c">Trocas (acum.)</th></tr></thead>
+            <tbody>
+              <tr><td>início</td><td>5 3 8 1 9 2</td><td class="c">0</td><td class="c">0</td></tr>
+              <tr><td>1</td><td>3 5 1 8 2 <span class="ok">9</span></td><td class="c">5</td><td class="c">3</td></tr>
+              <tr><td>2</td><td>3 1 5 2 <span class="ok">8 9</span></td><td class="c">9</td><td class="c">5</td></tr>
+              <tr><td>3</td><td>1 3 2 <span class="ok">5 8 9</span></td><td class="c">12</td><td class="c">7</td></tr>
+              <tr><td>4</td><td>1 2 <span class="ok">3 5 8 9</span></td><td class="c">14</td><td class="c">8</td></tr>
+              <tr><td>5</td><td><span class="ok">1 2 3 5 8 9</span> — sem trocas, para</td><td class="c">15</td><td class="c">8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">A 5ª passada ainda faz 1 comparação (par 1 e 2), mas nenhuma troca; a flag encerra o algoritmo. Total: 15 comparações e 8 trocas. Com o <code>sort()</code> (escopo fixo), <code>currentSize</code> não diminui: nesse mesmo vetor seriam 5 comparações por passada × 5 passadas = <strong>25 comparações</strong>. O <code>sortO2()</code> (igual à <code>MinMaxSort</code>) faz <strong>9 comparações e 10 trocas</strong>. Os três terminam ordenados — o que muda é o custo e o número de trocas.</p>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">Complexidade</h4>
+            <ul class="mb0">
+              <li><strong>Melhor:</strong> O(n) — já ordenado, uma passada e para.</li>
+              <li><strong>Médio/pior:</strong> O(n²) — ordem inversa é o pior.</li>
+              <li><strong>Memória extra:</strong> O(1).</li>
+              <li><strong>Trocas no pior caso:</strong> n(n−1)/2.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 class="mt0">Propriedades</h4>
+            <ul class="mb0">
+              <li><strong>Estável:</strong> sim — só troca quando <code>&gt;</code> (estrito).</li>
+              <li><strong>In-place:</strong> sim.</li>
+              <li><strong>Parada antecipada:</strong> sim, com a flag.</li>
+              <li><strong>Quando aparece:</strong> didático e vetores quase ordenados.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="insertion"><span class="num">04</span> Insertion Sort</h2>
+        <p>
+          Funciona como organizar cartas na mão: o prefixo <code>0..i−1</code> já está ordenado; você pega a
+          “carta” da posição <code>i</code> (chamada <code>aux</code> no repositório), abre espaço deslocando os maiores
+          para a direita e a encaixa no lugar certo. O prefixo cresce até cobrir o vetor inteiro.
+        </p>
+        <pre class="ascii">i=1, key=3:   [5 | 3  8  1  9  2]   5 &gt; 3 → desloca 5, encaixa 3
+              [3  5 | 8  1  9  2]
+i=2, key=8:   [3  5  8 | 1  9  2]   5 ≤ 8 → já está no lugar
+i=3, key=1:   [3  5  8  1 | 9  2]   8,5,3 &gt; 1 → deslocam; 1 vai para o início
+              [1  3  5  8 | 9  2]
+i=5, key=2:   [1  3  5  8  9 | 2]   9,8,5,3 &gt; 2 → deslocam; 2 entra após o 1
+              [1  2  3  5  8  9]</pre>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">InsertionSort.java — sort() · cópia fiel do repo</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sort() {
+    System.out.println(this.toString());
+    for (int i = 1; i &lt; this.size; i++) {
+
+        int aux = this.array[i];
+        int j = i;
+
+        while ((j &gt; 0) &amp;&amp; (this.array[j - 1] &gt; aux)) {
+            this.array[j] = this.array[j - 1];
+            j -= 1;
+            System.out.println(toString());
+        }
+        this.array[j] = aux;
+
+    }
+}</code></pre>
+        </div>
+        <p class="table-note">O <code>System.out.println</code> dentro do laço faz parte do código do professor:
+        ele imprime o vetor a cada deslocamento. A lógica é a mesma da versão didática; a diferença é que aqui
+        a comparação é estritamente <code>&gt;</code>, o que preserva a estabilidade.</p>
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>Cuidado com o sinal</strong>
+            <p class="mb0">Use <code>array[j] &gt; key</code> (estrito) para manter a estabilidade: elementos iguais não são deslocados, então a ordem relativa entre eles é preservada. Se usar <code>&gt;=</code>, o algoritmo deixa de ser estável.</p>
+          </div>
+        </div>
+
+        <h3>Traço completo em <code>[5, 3, 8, 1, 9, 2]</code></h3>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>i</th><th>key</th><th>O que acontece</th><th>Vetor após encaixar</th><th class="c">Comp. acum.</th><th class="c">Desloc. acum.</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>3</td><td>5 &gt; 3 → desloca</td><td>[3, 5, 8, 1, 9, 2]</td><td class="c">1</td><td class="c">1</td></tr>
+              <tr><td>2</td><td>8</td><td>5 ≤ 8 → para</td><td>[3, 5, 8, 1, 9, 2]</td><td class="c">2</td><td class="c">1</td></tr>
+              <tr><td>3</td><td>1</td><td>8, 5, 3 &gt; 1 → desloca 3</td><td>[1, 3, 5, 8, 9, 2]</td><td class="c">5</td><td class="c">4</td></tr>
+              <tr><td>4</td><td>9</td><td>8 ≤ 9 → para</td><td>[1, 3, 5, 8, 9, 2]</td><td class="c">6</td><td class="c">4</td></tr>
+              <tr><td>5</td><td>2</td><td>9, 8, 5, 3 &gt; 2 → desloca 4</td><td>[1, 2, 3, 5, 8, 9]</td><td class="c">11</td><td class="c">8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Os números conferem com <code>codigo/InsertionSortMetrics.java</code> (cópia instrumentada;
+        o <code>InsertionSort.java</code> do repo não tem contadores e imprime o vetor a cada deslocamento). Note que
+        o prefixo ordenado não significa “posição final”: o 8 estava no prefixo e depois andou para a direita.</p>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">Complexidade</h4>
+            <ul class="mb0">
+              <li><strong>Melhor:</strong> O(n) — cada chave para após 1 comparação.</li>
+              <li><strong>Médio/pior:</strong> O(n²) — muitas inversões.</li>
+              <li><strong>Memória extra:</strong> O(1).</li>
+              <li><strong>Movimentações:</strong> até n(n−1)/2 deslocamentos.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 class="mt0">Propriedades</h4>
+            <ul class="mb0">
+              <li><strong>Estável:</strong> sim, com comparação estrita.</li>
+              <li><strong>In-place:</strong> sim.</li>
+              <li><strong>Parada antecipada:</strong> natural, pois o laço interno para cedo.</li>
+              <li><strong>Quando aparece:</strong> melhor escolha simples para vetores pequenos ou quase ordenados.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="selection"><span class="num">05</span> Selection Sort</h2>
+        <p>
+          A ideia clássica: a cada posição <code>i</code>, procure o <strong>menor elemento</strong> do
+          trecho <code>i..n−1</code> e troque-o com <code>i</code>. A parte esquerda vai ficando
+          definitivamente ordenada. Diferente do Bubble, ele <strong>não</strong> tem parada antecipada:
+          sempre faz todas as comparações, mesmo que o vetor já esteja ordenado.
+        </p>
+        <p>
+          O repositório tem <strong>três</strong> métodos nesse arquivo, e dois deles enganam:
+          <code>sort()</code> é a versão que <strong>troca na hora</strong>, a cada valor menor que
+          <code>array[y]</code> (correta, mas com mais trocas); <code>sortO1()</code> <em>parece</em> a versão
+          clássica com <code>minIndx</code>, mas <strong>não ordena</strong> por causa de um bug de comparação;
+          <code>sortO2()</code> é a seleção <strong>bidirecional</strong> (mínimo e máximo por passada) e ordena.
+          <code>sort()</code> e <code>sortO1()</code> fazem as mesmas <code>n(n−1)/2</code> comparações;
+          <code>sortO2()</code> faz cerca de metade (em n = 6, 9 em vez de 15).
+        </p>
+        <pre class="ascii">Versão clássica (minIndex):
+i=0: procura o menor de [5 3 8 1 9 2] → 1 (índice 3)
+     troca 5 ↔ 1:  [1 | 3 8 5 9 2]
+i=1: menor de [3 8 5 9 2] → 2 (índice 5)
+     troca 3 ↔ 2:  [1 2 | 8 5 9 3]
+i=2: menor de [8 5 9 3] → 3 (índice 5)
+     troca 8 ↔ 3:  [1 2 3 | 5 9 8]
+i=3: menor de [5 9 8] → 5 (já está)  [1 2 3 5 | 9 8]
+i=4: menor de [9 8] → 8; troca 9 ↔ 8  [1 2 3 5 8 9]</pre>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SelectionSort.java — sort() do repositório</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sort() {
+    for (int y = 0; y &lt; size - 1; y++) {
+        for (int x = y + 1; x &lt; size; x++) {
+            if (array[y] &gt; array[x]) {
+                swap(x, y);          // troca a cada valor menor encontrado
+            }
+        }
+    }
+}</code></pre>
+        </div>
+        <p class="table-note">No vetor <code>[5, 3, 8, 1, 9, 2]</code>, essa versão faz <strong>8 trocas</strong>
+        (duas por passada nas três primeiras, uma nas duas últimas). A clássica faz apenas <strong>4</strong>.</p>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SelectionSort.java — sortO1() (tem bug) · cópia fiel do repo</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sortO1() {
+    int minIndx = 0;
+    for (int y = 0; y &lt; size - 1; y++) {
+        minIndx = y;
+        for (int x = y + 1; x &lt; size; x++) {
+            if (this.array[y] &gt; this.array[x]) {
+                minIndx = x;
+            }
+        }
+        swap(y, minIndx);
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout danger">
+          <span class="ico">🚨</span>
+          <div>
+            <strong>O <code>sortO1()</code> do repositório não ordena</strong>
+            <p>
+              A comparação deveria ser <code>array[x] &lt; array[minIndx]</code>, mas o código compara
+              <code>array[y] &gt; array[x]</code>. Como <code>array[y]</code> não muda dentro do laço,
+              <code>minIndx</code> acaba sendo apenas o <strong>último</strong> elemento menor que
+              <code>array[y]</code>, e não o menor do trecho.
+            </p>
+            <p class="mb0">Trace <code>[9, 1, 4]</code>: y=0 compara 9&gt;1 (minIndx=1) e 9&gt;4 (minIndx=2);
+            troca 9↔4 e obtém <code>[4, 1, 9]</code>. y=1 compara 1&gt;9 (falso) e para.
+            Resultado final: <strong><code>[4, 1, 9]</code></strong>, fora de ordem. Testado no código do repo:
+            falha em 233 de 407 vetores aleatórios.</p>
+          </div>
+        </div>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SelectionSort.java — sortO2() (bidirecional) · cópia fiel do repo</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sortO2() {
+    int lowLimit = 0;
+    int highLimit = size - 1;
+
+    while (lowLimit &lt; highLimit) {
+        int minIndx = lowLimit;
+        int maxIndx = lowLimit;
+
+        for (int x = lowLimit + 1; x &lt;= highLimit; x++) {
+            if (this.array[x] &lt; this.array[minIndx]) {
+                minIndx = x;
+            }
+            if (this.array[x] &gt; this.array[maxIndx]) {
+                maxIndx = x;
+            }
+        }
+        this.swap(maxIndx, highLimit);
+        if (minIndx == highLimit) {
+            minIndx = maxIndx;
+        }
+        this.swap(minIndx, lowLimit);
+        lowLimit++;
+        highLimit--;
+    }
+}</code></pre>
+        </div>
+        <p class="table-note">O <code>if (minIndx == highLimit) minIndx = maxIndx;</code> existe para o caso em que
+        o mínimo estava justamente na posição do máximo: depois da primeira troca, ele “mudou de lugar”. É a
+        pegadinha dessa variante. Ela ordena corretamente (testado em 400 vetores aleatórios), mas continua
+        O(n²) em comparações.</p>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SelectionSort.java — sortClassic() (correção do guia, NÃO está no repo)</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public void sortClassic() {
+    for (int y = 0; y &lt; size - 1; y++) {
+        int minIndex = y;
+        for (int x = y + 1; x &lt; size; x++) {
+            if (array[x] &lt; array[minIndex]) {   // aqui está a correção do sortO1()
+                minIndex = x;
+            }
+        }
+        if (minIndex != y) {
+            swap(y, minIndex);       // no máximo n-1 trocas
+        }
+    }
+}</code></pre>
+        </div>
+        <p class="table-note">Essa é a <strong>única diferença</strong> entre o <code>sortO1()</code> do repo e um
+        Selection correto: comparar <code>array[x] &lt; array[minIndex]</code> em vez de <code>array[y] &gt; array[x]</code>.
+        Se a prova mostrar o <code>sortO1()</code> e perguntar “esse código ordena?”, a resposta é
+        <strong>não</strong>.</p>
+
+        <h3>Traço do <code>sort()</code> do repositório em <code>[5, 3, 8, 1, 9, 2]</code></h3>
+        <div class="table-wrap">
+          <table class="trace">
+            <thead><tr><th>y</th><th>O que acontece na passada</th><th>Vetor ao final</th><th class="c">Comp. acum.</th><th class="c">Trocas acum.</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>troca 5↔3 e depois 3↔1</td><td>[1, 5, 8, 3, 9, 2]</td><td class="c">5</td><td class="c">2</td></tr>
+              <tr><td>1</td><td>troca 5↔3 e depois 3↔2</td><td>[1, 2, 8, 5, 9, 3]</td><td class="c">9</td><td class="c">4</td></tr>
+              <tr><td>2</td><td>troca 8↔5 e depois 5↔3</td><td>[1, 2, 3, 8, 9, 5]</td><td class="c">12</td><td class="c">6</td></tr>
+              <tr><td>3</td><td>troca 8↔5</td><td>[1, 2, 3, 5, 9, 8]</td><td class="c">14</td><td class="c">7</td></tr>
+              <tr><td>4</td><td>troca 9↔8</td><td>[1, 2, 3, 5, 8, 9]</td><td class="c">15</td><td class="c">8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Sempre 5 + 4 + 3 + 2 + 1 = 15 comparações, independentemente da entrada. Na versão clássica,
+        o mesmo vetor faria 4 trocas: 5↔1, 3↔2, 8↔3, nenhuma e 9↔8. Os dois traços terminam no mesmo vetor.</p>
+
+        <div class="callout danger">
+          <span class="ico">🚨</span>
+          <div>
+            <strong>Selection não é estável — exemplo cobrado em prova</strong>
+            <p class="mb0">Vetor <code>[3a, 3b, 1]</code>. O menor é 1; o algoritmo troca 1 com a posição 0 (3a): <code>[1, 3b, 3a]</code>. Os dois 3 iguais inverteram a ordem relativa. Por isso o Selection é considerado <strong>instável</strong>. Se a questão pedir “qual algoritmo escolher para preservar ordem de registros com mesma chave”, não use Selection.</p>
+          </div>
+        </div>
+
+        <h2 id="comparacao"><span class="num">06</span> Comparação lado a lado</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Critério</th><th>Bubble</th><th>Insertion</th><th>Selection</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Ideia</strong></td><td>troca vizinhos; maior vai para o fim</td><td>encaixa a chave no prefixo ordenado</td><td>escolhe o mínimo e põe no começo</td></tr>
+              <tr><td><strong>Melhor caso</strong></td><td class="c">O(n) com flag</td><td class="c">O(n)</td><td class="c">O(n²)</td></tr>
+              <tr><td><strong>Médio / pior</strong></td><td class="c">O(n²) / O(n²)</td><td class="c">O(n²) / O(n²)</td><td class="c">O(n²) / O(n²)</td></tr>
+              <tr><td><strong>Comparações (pior)</strong></td><td>clássico ~n(n−1)/2; <code>sort()</code> até n(n−1)</td><td>~n(n−1)/2</td><td>sempre n(n−1)/2</td></tr>
+              <tr><td><strong>Trocas / movimentos</strong></td><td>até n(n−1)/2 trocas</td><td>até n(n−1)/2 deslocamentos</td><td>clássica: ≤ n−1; repo: até n(n−1)/2</td></tr>
+              <tr><td><strong>Estável?</strong></td><td><span class="pill green">sim</span></td><td><span class="pill green">sim</span></td><td><span class="pill rose">não</span></td></tr>
+              <tr><td><strong>In-place?</strong></td><td>sim</td><td>sim</td><td>sim</td></tr>
+              <tr><td><strong>Parada antecipada?</strong></td><td>sim (flag)</td><td>sim (natural)</td><td>não</td></tr>
+              <tr><td><strong>Melhor uso</strong></td><td>didático; quase ordenado com flag</td><td>vetor pequeno ou quase ordenado</td><td>quando trocar é caro</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout exam">
+          <span class="ico">📝</span>
+          <div>
+            <strong>Como isso cai na prova</strong>
+            <ul class="mb0">
+              <li><strong>“Mostre o vetor após a 2ª passada do Bubble”</strong> → faça uma passada inteira por vez, sem misturar.</li>
+              <li><strong>“Quantas comparações o Selection faz com n = 8?”</strong> → 8·7/2 = 28, sempre.</li>
+              <li><strong>“Qual algoritmo escolher se o vetor está quase ordenado?”</strong> → Insertion, O(n) na prática.</li>
+              <li><strong>“Qual faz menos trocas?”</strong> → Selection clássico, no máximo n−1. O <code>sort()</code> do repositório troca a cada valor menor e pode fazer mais.</li>
+              <li><strong>“Esse <code>sortO1()</code> ordena?”</strong> → <strong>Não.</strong> Ele compara <code>array[y] &gt; array[x]</code> em vez de comparar com <code>array[minIndx]</code>; com <code>[9, 1, 4]</code> termina em <code>[4, 1, 9]</code>.</li>
+              <li><strong>“O que é o <code>sortO2()</code>?”</strong> → seleção bidirecional (mínimo e máximo por passada). É a mesma ideia da <code>MinMaxSort</code> do Bubble, mas no arquivo do Selection.</li>
+              <li><strong>“Identifique o algoritmo pelo trecho de código”</strong> → procure <code>aux</code> (ou <code>key</code>) e deslocamento (Insertion), <code>minIndex</code> (Selection), <code>swap(i, i+1)</code> (Bubble).</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="exercicios"><span class="num">07</span> Exercícios de fixação</h2>
+        <p>Resolva no papel antes de abrir a resposta. O ato de escrever o vetor é o que fixa o algoritmo.</p>
+
+        <details class="examq">
+          <summary>1. Aplique duas passadas completas do Bubble em <code>[4, 2, 7, 1]</code>. Qual o vetor?</summary>
+          <div class="details-body">
+            <p><strong>Passada 1:</strong> 4↔2 → [2,4,7,1]; 4&lt;7 → ok; 7↔1 → [2,4,1,7].<br>
+            <strong>Passada 2:</strong> 2&lt;4 → ok; 4↔1 → [2,1,4,7]; 4&lt;7 → ok.</p>
+            <p class="mb0"><strong>Resposta:</strong> <code>[2, 1, 4, 7]</code>. O 7 já está fixo; o restante ainda não.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>2. Quantas comparações o Selection Sort faz para n = 8? E quantas trocas, no máximo, na versão clássica?</summary>
+          <div class="details-body">
+            <p class="mb0">Comparações = n(n−1)/2 = 8·7/2 = <strong>28</strong>, sempre. Na versão clássica (minIndex), trocas ≤ n−1 = <strong>7</strong>. O <code>sort()</code> do repositório pode trocar mais, mas continua O(n²) em comparações.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>3. Por que o Insertion é O(n) no melhor caso, mas o Selection continua O(n²)?</summary>
+          <div class="details-body">
+            <p class="mb0">No Insertion, se o vetor já está ordenado, cada <code>aux</code> é comparada uma vez com o vizinho da esquerda e o laço interno para imediatamente: ~n−1 comparações. O Selection não tem essa saída: para cada posição, ele varre todo o restante para garantir que achou o mínimo, totalizando n(n−1)/2 comparações mesmo com o vetor ordenado.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>4. Em um vetor de 6 elementos em ordem inversa, quantas trocas o Bubble faz no total?</summary>
+          <div class="details-body">
+            <p class="mb0">Cada par fora de ordem é invertido exatamente uma vez: n(n−1)/2 = 6·5/2 = <strong>15 trocas</strong>. Em ordem inversa esse é o pior caso, tanto de comparações quanto de trocas.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>5. O trecho abaixo é de qual algoritmo? Justifique.<br><code>while (j &gt;= 0 &amp;&amp; v[j] &gt; chave) { v[j+1] = v[j]; j--; } v[j+1] = chave;</code></summary>
+          <div class="details-body">
+            <p class="mb0"><strong>Insertion Sort.</strong> A presença da variável <code>chave</code> e o deslocamento dos maiores para a direita, deixando um “buraco” para encaixar a chave, são a assinatura do Insertion. No Bubble haveria <code>swap(i, i+1)</code>; no Selection, <code>minIndex</code>.</p>
+          </div>
+        </details>
+
+        <div class="callout tip">
+          <span class="ico">✅</span>
+          <div>
+            <strong>Checklist antes de seguir</strong>
+            <p class="mb0">Você consegue, sem olhar: (1) traçar uma passada do Bubble; (2) explicar o prefixo ordenado do Insertion; (3) dizer por que o Selection clássico faz ≤ n−1 trocas; (4) preencher a tabela de complexidade. Se algum item falhar, releia só ele.</p>
+          </div>
+        </div>
+
+        <div class="done-box">
+          <label><input type="checkbox" data-progress="ordenacao"> Concluí esta página</label>
+          <span class="done-hint">O progresso fica salvo neste navegador.</span>
+        </div>
+
+        <div class="page-nav">
+          <a href="../index.html"><span class="pn-lbl">← Voltar</span><span class="pn-title">Visão geral</span></a>
+          <a class="next" href="listas-sequenciais.html"><span class="pn-lbl">Próximo →</span><span class="pn-title">Listas sequenciais</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Código completo em <a href="../codigo/BubbleSort.java">BubbleSort.java</a>, <a href="../codigo/SelectionSort.java">SelectionSort.java</a>, <a href="../codigo/InsertionSort.java">InsertionSort.java</a> e <a href="../codigo/MinMaxSort.java">MinMaxSort.java</a></span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/sort-demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guia de Prova — Estruturas de Dados 2026/2</title>
+  <meta name="description" content="Guia completo e offline para a 2ª prova de Estruturas de Dados: ordenação simples, listas sequenciais e encadeadas, pilhas e filas.">
+  <link rel="stylesheet" href="css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="inicio" data-root="" data-topic="geral">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+
+        <section class="hero">
+          <span class="eyebrow">⏳ 2ª Prova · 16/11/2026 · 15h10 · sala 11</span>
+          <h1>Estruturas de Dados,<br>sem pânico.</h1>
+          <p class="lead">
+            <span data-prazo>Reta final.</span> Este guia cobre <strong>exatamente</strong> o que cai:
+            os três algoritmos de ordenação simples, listas sequenciais e encadeadas, pilhas e filas —
+            com teoria objetiva, código Java testado, visualizadores passo a passo, questões e simulado.
+          </p>
+
+          <div class="hero-count" data-countdown aria-label="Tempo até a prova">
+            <div><b data-d>--</b><span>dias</span></div>
+            <div><b data-h>--</b><span>horas</span></div>
+            <div><b data-m>--</b><span>min</span></div>
+            <div><b data-s>--</b><span>seg</span></div>
+          </div>
+
+          <div class="hero-actions" style="margin-top:16px">
+            <a class="btn" href="pages/ordenacao.html">Começar por ordenação →</a>
+            <a class="btn ghost" href="#plano">Ver plano de reta final</a>
+            <a class="btn ghost" href="pages/simulado.html">Ir para o simulado</a>
+          </div>
+        </section>
+
+        <div class="exam-banner">
+          <span class="eb-ico" aria-hidden="true">🎯</span>
+          <div class="eb-text">
+            <strong>Estratégia: não tente decorar código. Entenda o desenho.</strong>
+            Em prova de estruturas, os pontos vêm de <em>traçar o vetor</em>, <em>desenhar os ponteiros</em> e
+            <em>justificar a complexidade</em>. O código é consequência disso.
+          </div>
+          <span class="eb-date">16/11 · 15h10</span>
+        </div>
+
+        <h2 id="mapa"><span class="num">01</span> O que cai na prova</h2>
+        <p>
+          Cinco blocos, exatamente a lista do professor. Quatro estão nos exemplos do repositório
+          (ordenação vem do <code>ed20261</code>; listas, pilhas e filas do <code>ed20262</code>). A lista
+          <strong>simplesmente encadeada</strong> e a <strong>fila circular</strong> não têm exemplo no repo:
+          são complementos do guia para o que a prova pede.
+        </p>
+
+        <div class="grid grid-2">
+          <a class="card topic-card" href="pages/ordenacao.html">
+            <span class="status" data-page-status="ordenacao">pendente</span>
+            <div class="card-kicker">Bloco 1 · presença quase certa</div>
+            <h3>🔢 Ordenação simples</h3>
+            <p>Bubble, Insertion e Selection: como funcionam, traço passo a passo, comparações, trocas, estabilidade e complexidade.</p>
+            <p><span class="pill amber">O(n²)</span> <span class="pill">traço de vetor</span> <span class="pill">estabilidade</span></p>
+            <span class="card-arrow">Estudar bloco →</span>
+          </a>
+
+          <a class="card topic-card" href="pages/listas-sequenciais.html">
+            <span class="status" data-page-status="sequencial">pendente</span>
+            <div class="card-kicker">Bloco 2 · presença quase certa</div>
+            <h3>▦ Listas sequenciais</h3>
+            <p>Vetor + count: inserir, remover, buscar e deslocar. A implementação completa da classe que está em branco no repositório.</p>
+            <p><span class="pill blue">acesso O(1)</span> <span class="pill">deslocamentos</span> <span class="pill">capacidade fixa</span></p>
+            <span class="card-arrow">Estudar bloco →</span>
+          </a>
+
+          <a class="card topic-card" href="pages/listas-encadeadas.html">
+            <span class="status" data-page-status="encadeada">pendente</span>
+            <div class="card-kicker">Bloco 3 · presença quase certa</div>
+            <h3>🔗 Listas encadeadas</h3>
+            <p>Lista simples e dupla, nó, descritor (size/início/fim) e a ordem correta dos ponteiros ao inserir e remover.</p>
+            <p><span class="pill violet">next / prev</span> <span class="pill">descritor</span> <span class="pill">desenhar ponteiros</span></p>
+            <span class="card-arrow">Estudar bloco →</span>
+          </a>
+
+          <a class="card topic-card" href="pages/pilhas.html">
+            <span class="status" data-page-status="pilhas">pendente</span>
+            <div class="card-kicker">Bloco 4 · muito provável</div>
+            <h3>🥞 Pilhas</h3>
+            <p>LIFO, push/pop/peek, implementação com vetor e com lista, avaliação pós-fixa e parênteses balanceados.</p>
+            <p><span class="pill rose">LIFO</span> <span class="pill">pós-fixa</span> <span class="pill">chaves e parênteses</span></p>
+            <span class="card-arrow">Estudar bloco →</span>
+          </a>
+
+          <a class="card topic-card" href="pages/filas.html">
+            <span class="status" data-page-status="filas">pendente</span>
+            <div class="card-kicker">Bloco 5 · muito provável</div>
+            <h3>🚶 Filas</h3>
+            <p>FIFO, enqueue/dequeue, fila circular com front/rear/count e fila sobre lista encadeada.</p>
+            <p><span class="pill green">FIFO</span> <span class="pill">fila circular</span> <span class="pill">front / rear</span></p>
+            <span class="card-arrow">Estudar bloco →</span>
+          </a>
+
+          <a class="card topic-card" href="pages/resumo.html">
+            <span class="status" data-page-status="resumo">pendente</span>
+            <div class="card-kicker">Fechamento</div>
+            <h3>📌 Resumo de véspera</h3>
+            <p>Uma folha com todas as tabelas, fórmulas, pegadinhas e um checklist final. Leia na segunda antes da prova.</p>
+            <p><span class="pill accent">imprimir</span> <span class="pill">revisão rápida</span></p>
+            <span class="card-arrow">Abrir resumo →</span>
+          </a>
+        </div>
+
+        <h2 id="plano"><span class="num">02</span> Plano de reta final</h2>
+        <p>
+          A prova é em 16/11, às 15h10. O plano usa a véspera e o dia da prova; se o tempo está curto,
+          mantenha a ordem e corte o que não der: ordenação → listas → pilhas/filas → simulado.
+        </p>
+
+        <ol class="timeline">
+          <li>
+            <span class="tl-time">Véspera · 2h30</span><span class="tl-title">Ordenação simples</span>
+            <p>Leia <a href="pages/ordenacao.html">o bloco de ordenação</a>, mexa no visualizador com <code>[5,3,8,1,9,2]</code> e refaça as três tabelas de traço <strong>no papel</strong>. Responda as 10 questões de ordenação no treino.</p>
+          </li>
+          <li>
+            <span class="tl-time">Véspera · 2h</span><span class="tl-title">Listas sequenciais + encadeadas</span>
+            <p>Primeiro <a href="pages/listas-sequenciais.html">sequencial</a>: entenda deslocamentos e implemente <code>insert</code>/<code>remove</code> de cabeça. Depois <a href="pages/listas-encadeadas.html">encadeada</a>: desenhe em papel a inserção no meio e a remoção, seta por seta.</p>
+          </li>
+          <li>
+            <span class="tl-time">Véspera · 2h</span><span class="tl-title">Pilhas e filas</span>
+            <p><a href="pages/pilhas.html">Pilha</a>: faça a tabela da expressão pós-fixa e da conversão infixa→pós-fixa. <a href="pages/filas.html">Fila</a>: simule a fila circular no papel até acertar <code>front</code>, <code>rear</code> e <code>count</code> sem olhar.</p>
+          </li>
+          <li>
+            <span class="tl-time">Véspera · 1h30</span><span class="tl-title">Resumo + simulado</span>
+            <p>Leia o <a href="pages/resumo.html">resumo</a> e faça o <a href="pages/simulado.html">simulado de 29 questões</a> cronometrado. Corrija e volte <strong>somente</strong> nos tópicos com erro.</p>
+          </li>
+          <li>
+            <span class="tl-time">Dia da prova · 1h</span><span class="tl-title">Revisão final, sem código novo</span>
+            <p>Refaça as questões erradas e leia a folha de resumo. Às 13h30, pare. Coma, leve água, caneta e chegue à sala 11 antes das 15h10.</p>
+          </li>
+        </ol>
+
+        <details>
+          <summary>🆘 Plano de emergência: só tenho 3 horas</summary>
+          <div class="details-body">
+            <ol>
+              <li><strong>40 min — Ordenação:</strong> leia as três ideias e as tabelas de traço. Decore a tabela de complexidade (Bubble/Insertion: melhor O(n), médio/pior O(n²); Selection: sempre O(n²), mas ≤ n−1 trocas na versão clássica).</li>
+              <li><strong>40 min — Listas:</strong> foque em <em>onde</em> os elementos se deslocam (sequencial) e na <em>ordem dos ponteiros</em> (encadeada). Desenhe uma inserção no meio.</li>
+              <li><strong>40 min — Pilhas e filas:</strong> LIFO/FIFO, pós-fixa e fila circular. São receitas curtas e valem muitos pontos.</li>
+              <li><strong>30 min — Resumo:</strong> leia a página de resumo inteira, principalmente as pegadinhas.</li>
+              <li><strong>30 min — Simulado:</strong> faça só 15 questões e leia os comentários das erradas.</li>
+            </ol>
+            <p class="mb0">Se tiver <strong>1 hora</strong>: leia o resumo e faça o treino de 10 questões de ordenação. É o melhor retorno por minuto.</p>
+          </div>
+        </details>
+
+        <h2 id="como"><span class="num">03</span> Como usar este site</h2>
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="card-kicker">Passo 1</div>
+            <h3>Entenda a ideia</h3>
+            <p>Cada página começa com o modelo mental e um diagrama. Se você não consegue explicar a estrutura em voz alta, releia antes de ir ao código.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Passo 2</div>
+            <h3>Veja o passo a passo</h3>
+            <p>Use os visualizadores: avance uma operação por vez e observe o que muda. No papel, reproduza o mesmo traço sem olhar.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Passo 3</div>
+            <h3>Escreva de memória</h3>
+            <p>Depois leia o código Java. Feche a página e escreva o método na folha. Compare. Repita só o que errou.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Passo 4</div>
+            <h3>Teste com questões</h3>
+            <p>Treino por tópico para fixar e simulado cronometrado para simular a prova. Leia todos os comentários, inclusive das que acertou.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Passo 5</div>
+            <h3>Marque o progresso</h3>
+            <p>Ao terminar uma página, marque “concluí esta página”. O progresso fica salvo neste navegador e aparece na home.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Extra</div>
+            <h3>Código para compilar</h3>
+            <p>Todos os arquivos Java estão em <a href="codigo/Demo.java"><code>web/codigo/</code></a> e passam em 54 testes. Rode <code>javac *.java &amp;&amp; java Demo</code> para ver tudo funcionando. Instruções completas no <a href="README.md">README</a>.</p>
+          </div>
+        </div>
+
+        <h2 id="progresso"><span class="num">04</span> Seu progresso</h2>
+        <div class="card">
+          <div class="big-progress">
+            <span class="progress-track"><span class="progress-fill" data-progress-fill style="width:0%"></span></span>
+            <span data-progress-label>0 de 6 páginas (0%)</span>
+          </div>
+          <ul class="checklist" style="margin-top:16px">
+            <li><label class="check-item"><input type="checkbox" data-progress="ordenacao"><span><span class="ci-title">Ordenação simples</span><span class="ci-sub">Bubble, Insertion, Selection + traços</span></span></label></li>
+            <li><label class="check-item"><input type="checkbox" data-progress="sequencial"><span><span class="ci-title">Listas sequenciais</span><span class="ci-sub">Vetor, count, deslocamentos</span></span></label></li>
+            <li><label class="check-item"><input type="checkbox" data-progress="encadeada"><span><span class="ci-title">Listas encadeadas</span><span class="ci-sub">Simples, dupla e descritor</span></span></label></li>
+            <li><label class="check-item"><input type="checkbox" data-progress="pilhas"><span><span class="ci-title">Pilhas</span><span class="ci-sub">LIFO, pós-fixa, parênteses</span></span></label></li>
+            <li><label class="check-item"><input type="checkbox" data-progress="filas"><span><span class="ci-title">Filas</span><span class="ci-sub">FIFO, fila circular, aplicações</span></span></label></li>
+            <li><label class="check-item"><input type="checkbox" data-progress="resumo"><span><span class="ci-title">Resumo de véspera</span><span class="ci-sub">Tabelas, fórmulas e checklist final</span></span></label></li>
+          </ul>
+        </div>
+
+        <div class="callout tip" style="margin-top:26px">
+          <span class="ico">💡</span>
+          <div>
+            <strong>Dica de prova que vale ponto</strong>
+            <p>Sempre que a questão pedir “o vetor após a passada”, escreva o vetor intermediário embaixo de cada comparação. É mais lento, mas evita o erro clássico de trocar na cabeça e perder a conta. Já nas questões de ponteiros, desenhe as caixas e as setas antes de escrever qualquer linha de código.</p>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <span class="ico">📚</span>
+          <div>
+            <strong>Fontes usadas</strong>
+            <p>Repositório da disciplina <a href="https://github.com/tadeumaffeis/ed20262">tadeumaffeis/ed20262</a> (listas, pilha, fila, pós-fixa), exemplos de ordenação de <a href="https://github.com/tadeumaffeis/ed20261">ed20261</a> e a Wikipedia para a visão geral dos algoritmos. O material foi reorganizado para estudo, com implementações comentadas e testadas.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Feito para funcionar offline. Abra <code>index.html</code> no navegador.</span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

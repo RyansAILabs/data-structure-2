@@ -1,0 +1,10 @@
+# Clones dos repositórios do professor usados como referência
+ed20261/
+ed20262/
+
+# Builds Java
+*.class
+
+# Sistema
+.DS_Store
+Thumbs.db

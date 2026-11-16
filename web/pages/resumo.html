@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resumo de véspera — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Folha de revisão rápida: tabelas de complexidade, receitas de ponteiros, pós-fixa, fila circular e pegadinhas de prova.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="resumo" data-root="../" data-topic="geral">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Resumo de véspera</div>
+        <span class="eyebrow">Fechamento · revise na segunda antes da prova</span>
+        <h1>Resumo de véspera</h1>
+        <p class="lead">
+          Se você só tem uma hora, leia esta página inteira e faça o simulado. Estão aqui as tabelas,
+          as receitas de código, as fórmulas e as pegadinhas que mais custam pontos. Foi feita para
+          imprimir e levar.
+        </p>
+        <div class="meta-row">
+          <span class="pill">~15 min de leitura</span>
+          <span class="pill">imprimível</span>
+          <span class="pill">revisão final</span>
+        </div>
+        <div class="controls">
+          <button class="btn" onclick="window.print()">🖨️ Imprimir / salvar em PDF</button>
+        </div>
+
+        <div class="toc" data-toc></div>
+
+        <h2 id="ordenacao"><span class="num">01</span> Ordenação em uma tabela</h2>
+        <div class="table-wrap">
+          <table class="compact">
+            <thead><tr><th>Algoritmo</th><th>Ideia em uma frase</th><th class="c">Melhor</th><th class="c">Médio/Pior</th><th class="c">Estável</th><th class="c">Movimentos</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Bubble</strong></td><td>troca vizinhos; maior vai ao fim</td><td class="c">O(n)*</td><td class="c">O(n²)</td><td class="c">sim</td><td class="c">até n(n−1)/2 trocas</td></tr>
+              <tr><td><strong>Insertion</strong></td><td>encaixa a chave no prefixo ordenado</td><td class="c">O(n)</td><td class="c">O(n²)</td><td class="c">sim</td><td class="c">até n(n−1)/2 desloc.</td></tr>
+              <tr><td><strong>Selection</strong></td><td>acha o mínimo e põe na posição</td><td class="c">O(n²)</td><td class="c">O(n²)</td><td class="c">não</td><td class="c">clássica: ≤ n−1 trocas</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">* com flag de parada antecipada. Todos são in-place (O(1) de memória extra). Selection faz sempre n(n−1)/2 comparações — para n = 5, 10; n = 8, 28; n = 10, 45.</p>
+
+        <div class="grid grid-3">
+          <div class="card card-soft"><h4 class="mt0">Bubble</h4><p class="mb0">Assinatura no código: <code>swap(i, i+1)</code> e flag <code>changed</code>. Se a passada não troca, para.</p></div>
+          <div class="card card-soft"><h4 class="mt0">Insertion</h4><p class="mb0">Assinatura: <code>key</code> + laço <code>while (j &gt;= 0 &amp;&amp; v[j] &gt; key)</code> deslocando. Melhor para quase ordenado.</p></div>
+          <div class="card card-soft"><h4 class="mt0">Selection</h4><p class="mb0">Assinatura clássica: <code>minIndex</code> + uma troca por posição. O <code>sort()</code> do repositório troca a cada valor menor. Instável: [3a, 3b, 1] → [1, 3b, 3a].</p></div>
+        </div>
+
+        <h3>As variantes do repositório (decore o nome)</h3>
+        <div class="table-wrap">
+          <table class="compact">
+            <thead><tr><th>Arquivo / método</th><th>O que é</th><th class="c">Em <code>[5,3,8,1,9,2]</code></th></tr></thead>
+            <tbody>
+              <tr><td><code>BubbleSort.sort()</code></td><td>escopo fixo: <code>currentSize</code> não diminui</td><td class="c">25 comp / 8 trocas</td></tr>
+              <tr><td><code>BubbleSort.sortO()</code></td><td>escopo reduzido (o “otimizado”)</td><td class="c">15 / 8</td></tr>
+              <tr><td><code>BubbleSort.sortO2()</code><br>= <code>MinMaxSort.sort()</code></td><td>bolha + mínimo (<code>minLimit</code>) — mistura</td><td class="c">9 / 10</td></tr>
+              <tr><td><code>SelectionSort.sort()</code></td><td>troca a cada valor menor — <strong>correto</strong></td><td class="c">15 comp / 8 trocas</td></tr>
+              <tr><td><code>SelectionSort.sortO1()</code></td><td><strong>bug</strong>: compara <code>array[y]</code>, não <code>array[minIndx]</code> — <strong>não ordena</strong></td><td class="c"><code>[9,1,4]</code> → <code>[4,1,9]</code></td></tr>
+              <tr><td><code>SelectionSort.sortO2()</code></td><td>seleção bidirecional (mín. e máx. por passada) — <strong>correto</strong></td><td class="c">9 comp / 6 trocas</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">O <code>sortO2()</code> do Bubble e a <code>MinMaxSort</code> estouram com vetor
+        vazio (<code>swap(0,0)</code>). O nome <code>sortOptimized()</code> que o guia usava <strong>não existe no
+        repositório</strong>: aquela versão é o <code>sortO()</code>.</p>
+
+        <h2 id="bigo"><span class="num">02</span> Complexidade das estruturas</h2>
+        <div class="table-wrap">
+          <table class="compact">
+            <thead><tr><th>Operação</th><th class="c">Sequencial</th><th class="c">Simples s/ descritor</th><th class="c">Simples c/ descritor</th><th class="c">Dupla c/ descritor</th></tr></thead>
+            <tbody>
+              <tr><td><code>get(i)</code></td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(n)</td></tr>
+              <tr><td><code>search(v)</code></td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(n)</td></tr>
+              <tr><td>Inserir início</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+              <tr><td>Inserir fim</td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+              <tr><td>Remover início</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+              <tr><td>Remover fim</td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(n)</td><td class="c">O(1)</td></tr>
+              <tr><td><code>size()</code></td><td class="c">O(1)</td><td class="c">O(n)</td><td class="c">O(1)</td><td class="c">O(1)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">O descritor guarda <code>size</code>, <code>inicio</code> e <code>fim</code>. Ele não dá acesso direto ao meio: <code>get</code> continua O(n).</p>
+
+        <h2 id="listas"><span class="num">03</span> Listas: o essencial</h2>
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">Sequencial</h4>
+            <ul class="mb0">
+              <li><code>elements</code> + <code>count</code>; posições <code>0..count−1</code>.</li>
+              <li>add no fim O(1); inserir/remover no início O(n) por deslocamento.</li>
+              <li><code>insert</code> aceita posição <code>0..count</code>; get/remove, <code>0..count−1</code>.</li>
+              <li>Inserir: laço para trás (<code>i = count; i &gt; pos; i--</code>).</li>
+              <li>Remover: laço para frente (<code>i = pos; i &lt; count−1; i++</code>).</li>
+              <li><code>pop()</code> = <code>remove(0)</code> (convenção da lista encadeada; o repo deixa em branco).</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 class="mt0">Encadeada</h4>
+            <ul class="mb0">
+              <li>Nó = valor + <code>next</code> (+ <code>prev</code> na dupla).</li>
+              <li>Sem acesso por índice: <code>get(i)</code> percorre O(n).</li>
+              <li>Sem descritor, inserir no fim e <code>size()</code> são O(n).</li>
+              <li>Com descritor, extremidades e tamanho são O(1).</li>
+              <li>Na dupla, remover nó conhecido é O(1) (tem <code>prev</code>).</li>
+              <li>Nós não são contíguos; a ordem vem dos ponteiros.</li>
+              <li>A classe do repo tem <code>capacity</code> e <code>isFull()</code>: ela <strong>enche</strong>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Receitas de ponteiros (decore a ordem)</h3>
+        <pre class="ascii">SIMPLES — inserir depois de p:
+    novo.next = p.next;      // 1) salva o resto
+    p.next = novo;           // 2) religa p
+
+SIMPLES — remover o primeiro:
+    inicio = inicio.next;
+    if (inicio == null) fim = null;
+    size--;
+
+SIMPLES — remover o nó alvo (precisa do anterior):
+    anterior.next = alvo.next;
+    if (alvo == fim) fim = anterior;
+    size--;
+
+DUPLA — inserir novo entre anterior e próximo:
+    novo.prev = anterior;
+    novo.next = próximo;
+    anterior.next = novo;
+    próximo.prev = novo;
+
+DUPLA — remover x:
+    if (x.prev != null) x.prev.next = x.next; else inicio = x.next;
+    if (x.next != null) x.next.prev = x.prev; else fim = x.prev;
+    size--;</pre>
+
+        <h2 id="pilhas-filas"><span class="num">04</span> Pilhas e filas</h2>
+        <div class="table-wrap">
+          <table class="compact">
+            <thead><tr><th>Estrutura</th><th>Política</th><th>Insere</th><th>Remove</th><th>Consulta</th><th class="c">Custo</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Pilha</strong></td><td>LIFO</td><td><code>push</code> no topo</td><td><code>pop</code> do topo</td><td><code>peek</code> topo</td><td class="c">O(1)</td></tr>
+              <tr><td><strong>Fila</strong></td><td>FIFO</td><td><code>enqueue</code> no fim</td><td><code>dequeue</code> da frente</td><td><code>peek</code> frente</td><td class="c">O(1)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">Pilha com vetor</h4>
+            <pre class="ascii mb0">top = -1 (vazia)
+push: data[++top] = v;
+pop:  v = data[top--];
+peek: data[top];</pre>
+          </div>
+          <div class="card">
+            <h4 class="mt0">Fila circular</h4>
+            <pre class="ascii mb0">enqueue: data[rear] = v;
+         rear = (rear + 1) % cap;
+         count++;
+dequeue: v = data[front];
+         front = (front + 1) % cap;
+         count--;
+vazia: count == 0
+cheia: count == cap</pre>
+          </div>
+        </div>
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>Sem campo count</strong>
+            <p class="mb0">Muitas implementações reservam uma posição vazia: cheia quando
+            <code>(rear + 1) % cap == front</code>; vazia quando <code>front == rear</code>. Nesse caso cabem
+            <code>cap − 1</code> elementos. Se o enunciado tiver <code>count</code>, use
+            <code>count == cap</code> / <code>count == 0</code>.</p>
+          </div>
+        </div>
+
+        <h2 id="expressoes"><span class="num">05</span> Pós-fixa e parênteses</h2>
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">Avaliar pós-fixa</h4>
+            <ol class="mb0">
+              <li>Número → <code>push</code>.</li>
+              <li>Operador → <code>pop</code> direita, depois <code>pop</code> esquerda.</li>
+              <li>Calcule <code>esquerda op direita</code> e empilhe.</li>
+              <li>No fim, o resultado é o único valor da pilha.</li>
+            </ol>
+            <p class="small mb0" style="margin-top:8px"><strong>Exemplo:</strong> <code>6 2 3 * - 4 +</code> → <code>(6 − 6) + 4 = 4</code>.</p>
+          </div>
+          <div class="card">
+            <h4 class="mt0">Infixa → pós-fixa</h4>
+            <ol class="mb0">
+              <li>Operando → saída.</li>
+              <li>Operador → desempilha enquanto o topo tiver precedência ≥; empilha o novo.</li>
+              <li><code>(</code> empilha; <code>)</code> desempilha até o <code>(</code>.</li>
+              <li>Fim → desempilha tudo.</li>
+            </ol>
+            <p class="small mb0" style="margin-top:8px"><strong>Exemplo:</strong> <code>A + B * C − D</code> → <code>A B C * + D −</code>.</p>
+          </div>
+        </div>
+        <p>
+          <strong>Parênteses balanceados:</strong> abertura empilha; fechamento desempilha e confere o par;
+          no fim, pilha vazia. Se fechar sem abrir, ou o par não casar, é falso.
+        </p>
+
+        <h2 id="pegadinhas"><span class="num">06</span> As 16 pegadinhas que mais custam ponto</h2>
+        <ol>
+          <li><strong>Contar passada do Bubble:</strong> uma passada completa percorre todos os pares do trecho atual. Não pare no meio.</li>
+          <li><strong>Selection é instável.</strong> Não diga que “todos os O(n²) são estáveis”.</li>
+          <li><strong>Selection não tem melhor caso:</strong> faz n(n−1)/2 comparações sempre. Na versão clássica são ≤ n−1 trocas; o <code>sort()</code> do repositório troca a cada valor menor.</li>
+          <li><strong>Insertion não é “bolha”:</strong> ele desloca e encaixa uma chave; o prefixo é ordenado, não o sufixo.</li>
+          <li><strong>Insertion estável</strong> só com comparação estrita (<code>&gt;</code>), não <code>&gt;=</code>.</li>
+          <li><strong>Faixa de inserção:</strong> <code>0..count</code>; leitura/remoção: <code>0..count−1</code>.</li>
+          <li><strong>Deslocamento do insert:</strong> de trás para frente. Do remove: de frente para trás.</li>
+          <li><strong>Ordem dos ponteiros:</strong> salve <code>p.next</code> antes de sobrescrever, senão perde a lista.</li>
+          <li><strong>Descritor não dá acesso O(1) ao meio:</strong> <code>get</code> continua O(n).</li>
+          <li><strong>Pós-fixa:</strong> segundo pop é o operando da esquerda. Em <code>8 3 -</code>, é 5, não −5.</li>
+          <li><strong>Fila cheia:</strong> com count, <code>count == capacidade</code>; sem count, <code>(rear+1)%cap == front</code>.</li>
+          <li><strong><code>pop()</code> tem dois significados:</strong> na lista sequencial, o guia usa <code>remove(0)</code> (o repo deixa o método em branco); na pilha, remove o <em>topo</em>. Leia o contexto.</li>
+          <li><strong>Nomes das variantes do Bubble:</strong> no repo, <code>sortO()</code> é escopo reduzido e <code>sortO2()</code> é a mistura com mínimo. <code>sortOptimized()</code> não existe.</li>
+          <li><strong><code>SelectionSort.sortO1()</code> não ordena:</strong> compara <code>array[y] &gt; array[x]</code> em vez de <code>array[x] &lt; array[minIndx]</code>. Em <code>[9,1,4]</code> termina em <code>[4,1,9]</code>.</li>
+          <li><strong>Lista encadeada do professor enche:</strong> tem <code>capacity</code> e <code>isFull()</code>; <code>add</code> retorna <code>false</code> quando cheia.</li>
+          <li><strong><code>sortO2()</code>/<code>MinMaxSort</code> com vetor vazio:</strong> estouram em <code>swap(0,0)</code>. É o comportamento do código do repo.</li>
+        </ol>
+
+        <h2 id="esqueletos"><span class="num">07</span> Esqueletos para escrever na prova</h2>
+        <div class="grid grid-2">
+          <div>
+            <h4>Insert sequencial</h4>
+            <div class="codeblock">
+              <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">insert</span><button class="copy" data-copy>Copiar</button></div>
+              <pre><code>if (isFull() || pos &lt; 0 || pos &gt; count) return false;
+for (int i = count; i &gt; pos; i--)
+    elements[i] = elements[i - 1];
+elements[pos] = value;
+count++;
+return true;</code></pre>
+            </div>
+          </div>
+          <div>
+            <h4>Remove sequencial</h4>
+            <div class="codeblock">
+              <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">remove</span><button class="copy" data-copy>Copiar</button></div>
+              <pre><code>if (pos &lt; 0 || pos &gt;= count)
+    throw new OperationFailed();
+int removed = elements[pos];
+for (int i = pos; i &lt; count - 1; i++)
+    elements[i] = elements[i + 1];
+count--;
+return removed;</code></pre>
+            </div>
+          </div>
+          <div>
+            <h4>Inserir depois de p (simples)</h4>
+            <div class="codeblock">
+              <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">insertAfter</span><button class="copy" data-copy>Copiar</button></div>
+              <pre><code>SimpleNode&lt;T&gt; novo = new SimpleNode&lt;&gt;(value);
+novo.setNext(p.getNext());
+p.setNext(novo);
+size++;</code></pre>
+            </div>
+          </div>
+          <div>
+            <h4>Remover x (dupla)</h4>
+            <div class="codeblock">
+              <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">removeNode</span><button class="copy" data-copy>Copiar</button></div>
+              <pre><code>if (x.getPrev() != null) x.getPrev().setNext(x.getNext());
+else descritor.setInicio(x.getNext());
+if (x.getNext() != null) x.getNext().setPrev(x.getPrev());
+else descritor.setFim(x.getPrev());
+descritor.setSize(descritor.getSize() - 1);</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h2 id="checklist"><span class="num">08</span> Checklist final</h2>
+        <ul class="checklist">
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei traçar Bubble, Insertion e Selection em um vetor pequeno.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei a tabela de complexidade e estabilidade de cor.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei escrever insert/remove sequencial sem olhar.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei desenhar inserção/remoção na lista simples e na dupla.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei dizer o que o descritor melhora — e o que não melhora.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei avaliar pós-fixa sem inverter os operandos.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei converter infixa simples para pós-fixa.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Sei atualizar front/rear com módulo e identificar cheia/vazia.</span></span></label></li>
+          <li><label class="check-item"><input type="checkbox"><span><span class="ci-title">Fiz o simulado e revisei todas as questões erradas.</span></span></label></li>
+        </ul>
+
+        <div class="callout tip">
+          <span class="ico">🍀</span>
+          <div>
+            <strong>Na prova</strong>
+            <p class="mb0">Leia a questão até o fim, sublinhe o que é pedido (“após duas passadas”, “quantas
+            trocas”, “qual estrutura”) e só então comece. Em código, declare as variáveis, trate lista vazia e
+            posição inválida, e atualize <code>size</code>/<code>count</code> no fim. Se travar, desenhe: o
+            desenho vale mais que a memória.</p>
+          </div>
+        </div>
+
+        <div class="done-box">
+          <label><input type="checkbox" data-progress="resumo"> Concluí esta página</label>
+          <span class="done-hint">Agora vá para o simulado.</span>
+        </div>
+
+        <div class="page-nav">
+          <a href="filas.html"><span class="pn-lbl">← Anterior</span><span class="pn-title">Filas</span></a>
+          <a class="next" href="simulado.html"><span class="pn-lbl">Próximo →</span><span class="pn-title">Simulado (29 questões)</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Dica: use “Imprimir / salvar em PDF” para levar só esta página.</span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

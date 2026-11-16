@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Listas sequenciais — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Listas lineares sequenciais: vetor, count, inserção, remoção, deslocamentos, complexidade e implementação Java completa.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="sequencial" data-root="../" data-topic="sequencial">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Listas sequenciais</div>
+        <span class="eyebrow">Bloco 2 · presença quase certa</span>
+        <h1>Listas lineares sequenciais</h1>
+        <p class="lead">
+          É o bom e velho vetor com um contador. Os elementos ficam <strong>lado a lado na memória</strong>,
+          sem buracos, nas posições <code>0..count−1</code>. Você ganha acesso direto O(1); paga com
+          deslocamentos quando insere ou remove no começo/meio. Este é o bloco em que a classe do repositório
+          está com os métodos em branco — aqui ela aparece completa e testada.
+        </p>
+        <div class="meta-row">
+          <span class="pill blue">~30 min de estudo</span>
+          <span class="pill">vetor + count</span>
+          <span class="pill">deslocamentos</span>
+          <span class="pill">código Java testado</span>
+        </div>
+
+        <div class="toc" data-toc></div>
+
+        <h2 id="modelo"><span class="num">01</span> O modelo: vetor + count</h2>
+        <p>
+          Uma lista sequencial tem dois campos essenciais: o vetor <code>elements</code> e o contador
+          <code>count</code>. O vetor tem <strong>capacidade fixa</strong>; o count diz quantas posições
+          estão ocupadas. A primeira posição livre é sempre <code>elements[count]</code>.
+        </p>
+        <pre class="ascii">capacidade = 6
+índice:    0     1     2     3     4     5
+        ┌─────┬─────┬─────┬─────┬─────┬─────┐
+vetor:  │ 10  │ 20  │ 30  │ 40  │     │     │
+        └─────┴─────┴─────┴─────┴─────┴─────┘
+count = 4  ─────────────────┘
+isFull() = false      size() = 4      isEmpty() = false</pre>
+        <ul>
+          <li><strong>count</strong> = quantidade de elementos; <strong>capacidade</strong> = tamanho do vetor.</li>
+          <li><strong>add</strong> grava em <code>elements[count]</code> e incrementa count — O(1).</li>
+          <li><strong>get/set</strong> usam o índice diretamente — O(1).</li>
+          <li><strong>search</strong> percorre do início ao fim — O(n).</li>
+        </ul>
+
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>count ≠ capacidade</strong>
+            <p class="mb0">Uma lista com capacidade 100 e count 3 tem apenas 3 elementos. Nunca use a capacidade como quantidade de elementos em um <code>for</code>. O laço correto é <code>for (int i = 0; i &lt; count; i++)</code>.</p>
+          </div>
+        </div>
+
+        <h2 id="operacoes"><span class="num">02</span> Operações e custos</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Operação</th><th>O que faz</th><th class="c">Custo</th></tr></thead>
+            <tbody>
+              <tr><td><code>isEmpty()</code> / <code>isFull()</code></td><td>compara count com 0 / capacidade</td><td class="c">O(1)</td></tr>
+              <tr><td><code>size()</code></td><td>retorna count</td><td class="c">O(1)</td></tr>
+              <tr><td><code>add(v)</code></td><td>insere no fim (<code>elements[count]</code>)</td><td class="c">O(1)</td></tr>
+              <tr><td><code>get(i)</code> / <code>set(i, v)</code></td><td>acesso direto por índice</td><td class="c">O(1)</td></tr>
+              <tr><td><code>search(v)</code></td><td>busca linear; retorna índice ou −1</td><td class="c">O(n)</td></tr>
+              <tr><td><code>insertAtBeginning(v)</code></td><td>desloca todos uma casa à direita</td><td class="c">O(n)</td></tr>
+              <tr><td><code>insert(pos, v)</code></td><td>desloca de pos até o fim</td><td class="c">O(n) no pior caso</td></tr>
+              <tr><td><code>pop()</code></td><td>remove e retorna o primeiro (<code>remove(0)</code>) — convenção da lista encadeada; o repo deixa em branco</td><td class="c">O(n)</td></tr>
+              <tr><td><code>removeLast()</code></td><td>remove e retorna o último</td><td class="c">O(1)</td></tr>
+              <tr><td><code>remove(pos)</code></td><td>desloca os seguintes uma casa à esquerda</td><td class="c">O(n) no pior caso</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">
+          “O(1) no fim” e “O(n) no início” explicam a diferença para a lista encadeada, onde o início é
+          barato e o fim depende de descritor.
+        </p>
+
+        <div class="callout warn">
+          <span class="ico">⚠️</span>
+          <div>
+            <strong>Cuidado: existem duas APIs da lista sequencial</strong>
+            <p>O repositório <strong>ed20262</strong> (o da sua turma) tem a classe em <strong>inglês</strong> e
+            <strong>em branco</strong>: <code>isEmpty</code>, <code>add</code>, <code>get</code>,
+            <code>set</code>, <code>search</code>, <code>insertAtBeginning</code>, <code>insert</code>,
+            <code>pop</code>, <code>removeLast</code>, <code>remove</code> — com <code>int</code> e
+            <code>OperationFailed</code>. É essa que a página usa e que você deve escrever na prova.</p>
+            <p class="mb0">O repositório <strong>ed20261</strong> (semestre anterior) tem outra versão, em
+            <strong>português</strong>: <code>adicionar</code>, <code>obter</code>, <code>alterar</code>,
+            <code>inserir</code>, <code>remover</code>, <code>removerUltimo</code> — sem exceções, devolvendo
+            <code>boolean</code>. A lógica é a mesma; mudam os nomes e o tratamento de erro. Não misture as
+            duas na mesma resposta.</p>
+          </div>
+        </div>
+        <p class="table-note">O <code>pop()</code> <strong>não está implementado no repositório</strong> (a classe
+        está em branco). O guia usou <code>remove(0)</code> porque é a convenção da <code>LinkedLinearList</code>
+        do professor; se o seu caderno define <code>pop</code> como o último, siga o caderno. O importante é
+        declarar a escolha na prova.</p>
+
+        <h2 id="insercao"><span class="num">03</span> Inserção: abrir espaço</h2>
+        <p>
+          Para inserir na posição <code>pos</code>, os elementos de <code>pos</code> até
+          <code>count−1</code> precisam andar uma casa para a direita. O segredo é
+          <strong>começar pelo fim</strong>; se você começar pelo começo, sobrescreve o próximo antes de
+          copiá-lo.
+        </p>
+        <pre class="ascii">Inserir 15 na posição 2 de [10, 20, 30, 40, _, _]
+
+1) elements[4] = elements[3]      [10, 20, 30, 40, 40, _]
+2) elements[3] = elements[2]      [10, 20, 30, 30, 40, _]
+3) elements[2] = 15               [10, 20, 15, 30, 40, _]
+4) count++                        count = 5
+
+Código:  for (int i = count; i &gt; pos; i--) elements[i] = elements[i-1];</pre>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SequentialLinearList.java — insert e add</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public boolean add(int value) {
+    if (isFull()) {
+        return false;
+    }
+    elements[count] = value;   // primeira posição livre
+    count++;
+    return true;
+}
+
+public boolean insert(int position, int value) {
+    // posição válida para inserir: 0 .. count (inclusive no fim)
+    if (isFull() || position &lt; 0 || position &gt; count) {
+        return false;
+    }
+    for (int i = count; i &gt; position; i--) {
+        elements[i] = elements[i - 1];   // abre espaço da direita para a esquerda
+    }
+    elements[position] = value;
+    count++;
+    return true;
+}
+
+public boolean insertAtBeginning(int value) {
+    return insert(0, value);
+}</code></pre>
+        </div>
+
+        <div class="callout exam">
+          <span class="ico">📝</span>
+          <div>
+            <strong>Pegadinha de prova: faixa de posições</strong>
+            <p class="mb0"><code>insert(pos, v)</code> aceita <code>0 ≤ pos ≤ count</code>, porque inserir em
+            <code>count</code> é inserir no fim. Já <code>get</code>, <code>set</code> e <code>remove</code>
+            aceitam <code>0 ≤ pos &lt; count</code>. Se a questão pedir “posições válidas para inserir em uma
+            lista com 5 elementos”, a resposta é <strong>0 a 5</strong>, não 0 a 4.</p>
+          </div>
+        </div>
+
+        <h2 id="remocao"><span class="num">04</span> Remoção: fechar o buraco</h2>
+        <p>
+          Ao remover a posição <code>pos</code>, guarde o valor antes de sobrescrever. Depois, puxe os
+          elementos seguintes uma casa para a esquerda, <strong>do começo para o fim</strong>, e decremente
+          count. A última posição deixa de fazer parte da lista.
+        </p>
+        <pre class="ascii">Remover a posição 1 de [10, 20, 30, 40, _, _]
+
+removido = elements[1] = 20
+1) elements[1] = elements[2]      [10, 30, 30, 40, _, _]
+2) elements[2] = elements[3]      [10, 30, 40, 40, _, _]
+3) count--                        count = 3
+Resultado lógico: [10, 30, 40]</pre>
+
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SequentialLinearList.java — remove</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public int remove(int position) throws OperationFailed {
+    if (position &lt; 0 || position &gt;= count) {
+        throw new OperationFailed();
+    }
+    int removed = elements[position];
+    for (int i = position; i &lt; count - 1; i++) {
+        elements[i] = elements[i + 1];   // puxa para a esquerda
+    }
+    count--;
+    return removed;
+}
+
+public int pop() throws OperationFailed {
+    return remove(0);              // nesta disciplina, pop = primeiro
+}
+
+public int removeLast() throws OperationFailed {
+    return remove(count - 1);
+}</code></pre>
+        </div>
+
+        <div class="callout danger">
+          <span class="ico">🚨</span>
+          <div>
+            <strong>Erro clássico: estourar o vetor</strong>
+            <p class="mb0">No <code>remove</code>, o laço deve ir até <code>i &lt; count - 1</code>. Se usar
+            <code>i &lt; count</code>, na última iteração você acessa <code>elements[count]</code>, que está
+            fora da parte ocupada (e possivelmente fora do vetor). No <code>insert</code>, o laço começa em
+            <code>i = count</code> e vai enquanto <code>i &gt; position</code>; isso é seguro porque
+            <code>elements[count]</code> é a primeira posição livre.</p>
+          </div>
+        </div>
+
+        <h2 id="implementacao"><span class="num">05</span> A classe implementada</h2>
+        <p>
+          No repositório, <code>SequentialLinearList.java</code> está com os corpos vazios — é um exercício.
+          A versão abaixo é a implementação completa e compila. Ela está em
+          <a href="../codigo/SequentialLinearList.java">codigo/SequentialLinearList.java</a>.
+          O bloco mostra os campos, o construtor e as consultas; <code>add</code>, <code>insert</code>,
+          <code>remove</code>, <code>pop</code> e <code>removeLast</code> aparecem nos blocos anteriores.
+        </p>
+        <div class="callout info">
+          <span class="ico">ℹ️</span>
+          <div>
+            <strong>Duas versões no material</strong>
+            <p class="mb0">O repositório <code>ed20261</code> tem uma implementação completa em português
+            (<code>ListaLinearSequencial</code>, com <code>adicionar</code>, <code>inserir</code>,
+            <code>remover</code> etc.). A disciplina atual (<code>ed20262</code>) usa a API em inglês
+            (<code>SequentialLinearList</code>), que é a implementada aqui. A lógica — vetor + contador e
+            deslocamentos — é a mesma.</p>
+          </div>
+        </div>
+        <div class="codeblock">
+          <div class="codebar"><span class="dots"><i></i><i></i><i></i></span><span class="filename">SequentialLinearList.java — campos, construtor e consultas</span><button class="copy" data-copy>Copiar</button></div>
+          <pre><code>public class SequentialLinearList {
+    private int[] elements;
+    private int count;
+
+    public SequentialLinearList(int capacity) {
+        if (capacity &lt; 0) {
+            throw new IllegalArgumentException("Capacity cannot be negative");
+        }
+        elements = new int[capacity];
+        count = 0;
+    }
+
+    public boolean isEmpty()  { return count == 0; }
+    public boolean isFull()   { return count == elements.length; }
+    public int size()         { return count; }
+
+    public int get(int position) {
+        validatePosition(position);
+        return elements[position];
+    }
+
+    public void set(int position, int newValue) {
+        validatePosition(position);
+        elements[position] = newValue;
+    }
+
+    public int search(int value) {
+        for (int i = 0; i &lt; count; i++) {
+            if (elements[i] == value) return i;
+        }
+        return -1;                  // não encontrado
+    }
+
+    private void validatePosition(int position) {
+        if (position &lt; 0 || position &gt;= count) {
+            throw new IndexOutOfBoundsException("Posição inválida: " + position);
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout tip">
+          <span class="ico">💡</span>
+          <div>
+            <strong>Como estudar o código para a prova</strong>
+            <p class="mb0">Não decore a classe inteira. Decore os <strong>quatro esqueletos</strong>: add, insert, remove e search. Todos cabem em 6 linhas. Na prova, escreva o campo <code>count</code>, valide a posição, faça o laço na direção certa e atualize count. O resto é sintaxe.</p>
+          </div>
+        </div>
+
+        <h2 id="analise"><span class="num">06</span> Vantagens, desvantagens e quando usar</h2>
+        <div class="grid grid-2">
+          <div class="card">
+            <h4 class="mt0">✅ Vantagens</h4>
+            <ul class="mb0">
+              <li>Acesso direto por índice em O(1).</li>
+              <li>Memória contígua: boa localidade de cache e menos overhead que ponteiros.</li>
+              <li>Implementação simples e previsível.</li>
+              <li>Percorrer é rápido e sequencial.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 class="mt0">❌ Desvantagens</h4>
+            <ul class="mb0">
+              <li>Capacidade fixa: pode encher ou desperdiçar memória.</li>
+              <li>Inserir/remover no início ou meio custa O(n) por causa dos deslocamentos.</li>
+              <li>Crescer exige realocar e copiar tudo (quando permitido).</li>
+              <li>Remoções frequentes no início são caras.</li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          <strong>Use</strong> quando precisa de acesso por índice, o tamanho é conhecido/próximo do máximo
+          e as inserções/remoções acontecem principalmente no fim. <strong>Evite</strong> quando o padrão é
+          inserir/remover no início (aí a lista encadeada brilha) ou quando o tamanho é muito imprevisível.
+        </p>
+
+        <h2 id="exercicios"><span class="num">07</span> Exercícios de fixação</h2>
+
+        <details class="examq">
+          <summary>1. Lista <code>[7, 8, 9]</code> (capacidade 6). Mostre o vetor após <code>insert(1, 99)</code>.</summary>
+          <div class="details-body">
+            <p class="mb0">Desloca 9 (índice 2→3) e 8 (1→2); grava 99 em 1. Resultado lógico:
+            <code>[7, 99, 8, 9]</code>; no vetor, count passa de 3 para 4.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>2. Lista <code>[10, 20, 30]</code>. Após <code>remove(0)</code> e <code>add(5)</code>, qual é o conteúdo?</summary>
+          <div class="details-body">
+            <p class="mb0"><code>remove(0)</code> remove 10 e puxa 20 e 30: <code>[20, 30]</code>.
+            <code>add(5)</code> grava na primeira posição livre (índice 2): <code>[20, 30, 5]</code>.
+            Note que o 5 entra no <em>fim lógico</em>, não em ordem.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>3. Escreva <code>removeLast()</code> usando <code>remove()</code>.</summary>
+          <div class="details-body">
+            <p class="mb0"><code>public int removeLast() throws OperationFailed { return remove(count - 1); }</code>.
+            Se a lista estiver vazia, <code>count - 1 = -1</code> e remove lança a exceção de posição inválida.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>4. Por que <code>add</code> é O(1) e <code>insertAtBeginning</code> é O(n)?</summary>
+          <div class="details-body">
+            <p class="mb0"><code>add</code> grava direto em <code>elements[count]</code>. Já
+            <code>insertAtBeginning</code> precisa deslocar todos os count elementos uma casa para a direita,
+            e isso cresce linearmente com n.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>5. Ache o erro: <code>for (int i = position; i &lt; count; i++) elements[i] = elements[i+1];</code></summary>
+          <div class="details-body">
+            <p class="mb0">Quando <code>i = count - 1</code>, o código acessa <code>elements[count]</code>,
+            que está fora da parte ocupada (e pode estourar o vetor se count == capacidade). O limite correto
+            é <code>i &lt; count - 1</code>.</p>
+          </div>
+        </details>
+
+        <details class="examq">
+          <summary>6. O que <code>search</code> retorna quando o valor não existe? E quando existe?</summary>
+          <div class="details-body">
+            <p class="mb0">Retorna <strong>−1</strong> se não encontrou e o <strong>índice da primeira
+            ocorrência</strong> se encontrou. Se houver repetições, uma busca do início encontra a primeira.</p>
+          </div>
+        </details>
+
+        <div class="callout tip">
+          <span class="ico">✅</span>
+          <div>
+            <strong>Checklist antes de seguir</strong>
+            <p class="mb0">Você consegue escrever de memória: (1) <code>insert</code> com o laço para trás;
+            (2) <code>remove</code> com o laço para frente; (3) a diferença entre as faixas de posição; (4)
+            justificar os custos O(1)/O(n).</p>
+          </div>
+        </div>
+
+        <div class="done-box">
+          <label><input type="checkbox" data-progress="sequencial"> Concluí esta página</label>
+          <span class="done-hint">O progresso fica salvo neste navegador.</span>
+        </div>
+
+        <div class="page-nav">
+          <a href="ordenacao.html"><span class="pn-lbl">← Anterior</span><span class="pn-title">Ordenação simples</span></a>
+          <a class="next" href="listas-encadeadas.html"><span class="pn-lbl">Próximo →</span><span class="pn-title">Listas encadeadas</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>Código completo em <a href="../codigo/SequentialLinearList.java">codigo/SequentialLinearList.java</a></span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>

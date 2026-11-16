@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulado e treino — Guia de Prova ED 2026/2</title>
+  <meta name="description" content="Simulado cronometrado de 29 questões e treino por tópico com correção comentada.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>try{var t=localStorage.getItem("ed-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-page="simulado" data-root="../" data-topic="geral">
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">ED</span>
+      <span>Guia de Prova<small>2026/2 · 2ª prova</small></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="countdown-mini" data-countdown-mini></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav" class="nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <strong>Prova: 16/11/2026, 15h10</strong>
+        Sala 11 · 2ª Prova<br>
+        Baseado nos códigos do prof. Tadeu Maffeis.
+      </div>
+    </aside>
+
+    <main class="main" id="conteudo">
+      <div class="content">
+        <div class="crumbs"><a href="../index.html">Início</a><span>/</span>Simulado</div>
+        <span class="eyebrow">Treino · 29 questões no formato da prova</span>
+        <h1>Simulado e treino</h1>
+        <p class="lead">
+          Duas formas de testar: o <strong>simulado cronometrado</strong> (29 questões, 90 minutos, correção
+          só no final) e o <strong>treino por tópico</strong> (feedback imediato e explicação). O banco tem
+          50 questões; o simulado usa as 29 marcadas como “formato de prova”.
+        </p>
+        <div class="meta-row">
+          <span class="pill">29 questões</span>
+          <span class="pill">90 minutos</span>
+          <span class="pill">gabarito comentado</span>
+          <span class="pill">46 no banco</span>
+        </div>
+
+        <div class="callout info">
+          <span class="ico">🧭</span>
+          <div>
+            <strong>Qual usar primeiro?</strong>
+            <p class="mb0">Se ainda está aprendendo, comece pelo <strong>treino por tópico</strong> e leia cada
+            explicação. Se já revisou tudo, faça o <strong>simulado</strong> de uma vez, sem consultar, para
+            simular pressão e tempo. O cronômetro só começa quando você clicar em “Iniciar simulado”.</p>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="simulado">Simulado · 29 questões</button>
+          <button class="tab" data-tab="treino">Treino por tópico</button>
+        </div>
+
+        <!-- ============ SIMULADO ============ -->
+        <section id="tab-simulado">
+          <div class="card" id="simIntro">
+            <div class="grid grid-3" style="margin-top:0">
+              <div class="stat"><div class="big">25</div><div class="lbl">questões</div></div>
+              <div class="stat"><div class="big">90</div><div class="lbl">minutos</div></div>
+              <div class="stat"><div class="big">0</div><div class="lbl">consulta</div></div>
+            </div>
+            <h3>Regras</h3>
+            <ul>
+              <li>Uma alternativa por questão; questões em branco contam como erro.</li>
+              <li>Você pode navegar livremente e responder em qualquer ordem.</li>
+              <li>O cronômetro começa no clique abaixo e não pausa. Ao chegar a zero, a prova é corrigida automaticamente.</li>
+              <li>A correção e o gabarito comentado aparecem apenas no final.</li>
+              <li><strong>Não recarregue a página</strong> durante o simulado: as respostas ficam em memória.</li>
+            </ul>
+            <div class="controls">
+              <button class="btn" id="simStart">Iniciar simulado →</button>
+              <span class="muted small">Reserve um lugar silencioso. Vale como treino de verdade.</span>
+            </div>
+          </div>
+
+          <div id="simArea" class="hidden">
+            <div class="quiz-head">
+              <span class="timer" id="simTimer">90:00</span>
+              <div class="quiz-progress">
+                <span class="progress-track"><span class="progress-fill" id="simFill" style="width:0%"></span></span>
+                <span id="simAnswered">0 de 25 respondidas</span>
+              </div>
+              <span style="flex:1"></span>
+              <span class="pill rose">sem consulta</span>
+            </div>
+            <form id="simForm" autocomplete="off"></form>
+            <div class="quiz-nav">
+              <button class="btn" id="simSubmit" type="button">Corrigir prova</button>
+              <span class="muted small">A correção mostra o gabarito de todas as questões.</span>
+            </div>
+          </div>
+
+          <div id="simResult" class="hidden"></div>
+        </section>
+
+        <!-- ============ TREINO ============ -->
+        <section id="tab-treino" class="hidden">
+          <div class="card" id="trainIntro">
+            <h3 class="mt0">Escolha um tópico</h3>
+            <p>
+              O treino mostra uma questão por vez, corrige na hora e explica a resposta. Ideal para fixar
+              um bloco antes de ir para o próximo. Você pode repetir quantas vezes quiser.
+            </p>
+            <div class="controls">
+              <label class="field" for="trainTopic">Tópico
+                <select id="trainTopic">
+                  <option value="todas">Todas as questões</option>
+                  <option value="ordenacao">Ordenação simples</option>
+                  <option value="sequencial">Listas sequenciais</option>
+                  <option value="encadeada">Listas encadeadas</option>
+                  <option value="pilhas">Pilhas</option>
+                  <option value="filas">Filas</option>
+                  <option value="geral">Conceitos gerais</option>
+                </select>
+              </label>
+              <button class="btn" id="trainStart">Começar treino →</button>
+            </div>
+            <p class="small muted mb0">
+              Dica: depois de errar, volte à página do tópico e refaça o exemplo no papel. Não avance só
+              porque a explicação “pareceu fazer sentido”.
+            </p>
+          </div>
+
+          <div id="trainArea" class="hidden"></div>
+        </section>
+
+        <h2 id="depois"><span class="num">01</span> Depois do simulado</h2>
+        <ol>
+          <li><strong>Anote os tópicos com mais erro</strong> no bloco de resultados. Volte somente a eles.</li>
+          <li><strong>Refaça as questões erradas</strong> no treino por tópico, sem olhar a explicação antes de responder.</li>
+          <li><strong>Reescreva no papel</strong> o traço ou o código que causou o erro. Se for ponteiro, desenhe as setas.</li>
+          <li><strong>Repita o simulado</strong> só se ainda houver tempo. O objetivo é entender, não acumular tentativas.</li>
+        </ol>
+        <div class="callout tip">
+          <span class="ico">🎯</span>
+          <div>
+            <strong>Meta realista</strong>
+            <p class="mb0">Acertar 70% ou mais no simulado já indica boa preparação. Abaixo de 50%, priorize
+            o <a href="resumo.html">resumo de véspera</a> e os tópicos com mais peso: ordenação, listas,
+            pilhas e filas.</p>
+          </div>
+        </div>
+
+        <div class="page-nav">
+          <a href="resumo.html"><span class="pn-lbl">← Anterior</span><span class="pn-title">Resumo de véspera</span></a>
+          <a class="next" href="../index.html"><span class="pn-lbl">Voltar →</span><span class="pn-title">Visão geral</span></a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <span>Guia de estudo independente · Estruturas de Dados 2026/2</span>
+        <span>29 questões no formato da prova · gabarito comentado</span>
+      </footer>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/quiz-data.js"></script>
+  <script src="../js/simulado.js"></script>
+</body>
+</html>
